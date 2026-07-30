@@ -48,7 +48,7 @@ describe('route table', () => {
     // session. Every path except the auth pages must be nested inside a layout.
     const publicPaths = routes.filter((r) => r.path).map((r) => r.path);
     expect(publicPaths.sort()).toEqual(
-      ['/forgot-password', '/login', '/reset-password', '/signup', '/verify-email'].sort(),
+      ['/contact', '/forgot-password', '/login', '/reset-password', '/verify-email'].sort(),
     );
   });
 });

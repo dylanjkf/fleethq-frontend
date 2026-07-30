@@ -1,18 +1,5 @@
 import { apiClient } from './client';
-import type { Company, LoginResult } from './types';
-
-export interface SignupInput {
-  companyName: string;
-  adminUsername: string;
-  adminPassword: string;
-  adminFullName: string;
-  adminEmail?: string;
-}
-
-export async function signup(input: SignupInput): Promise<LoginResult> {
-  const { data } = await apiClient.post<LoginResult>('/v1/companies', input);
-  return data;
-}
+import type { Company } from './types';
 
 export async function getMyCompany(): Promise<Company> {
   const { data } = await apiClient.get<Company>('/v1/companies/me');

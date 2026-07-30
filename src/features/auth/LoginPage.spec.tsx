@@ -18,7 +18,6 @@ function renderWithAuth(overrides: Partial<AuthContextValue> = {}) {
     user: null,
     can: () => false,
     login: vi.fn(),
-    signup: vi.fn(),
     selectCompany: vi.fn(),
     verifyMfa: vi.fn(),
     logout: vi.fn(),

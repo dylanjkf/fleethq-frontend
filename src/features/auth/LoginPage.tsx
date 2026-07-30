@@ -172,9 +172,9 @@ export function LoginPage() {
                   Forgot your password?
                 </Link>
                 <p className="text-center text-sm text-(--text-tertiary)">
-                  New to FleetOS?{' '}
-                  <Link to="/signup" className="text-accent-600 hover:underline">
-                    Create your company
+                  New to FleetHQ?{' '}
+                  <Link to="/contact" className="text-accent-600 hover:underline">
+                    Get in touch
                   </Link>
                 </p>
               </form>

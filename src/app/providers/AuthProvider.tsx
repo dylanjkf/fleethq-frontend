@@ -1,7 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import * as authApi from '@/api/auth';
-import { signup as signupApi, type SignupInput } from '@/api/companies';
 import { setUnauthorizedHandler } from '@/api/client';
 import { tokenStore } from '@/api/token-store';
 import type { CurrentUser, LoginResult } from '@/api/types';
@@ -15,8 +14,6 @@ export interface AuthContextValue {
   /** Server-truth permission check — never a hardcoded role/name comparison. */
   can: (permission: PermissionKey) => boolean;
   login: (username: string, password: string) => Promise<LoginResult>;
-  /** Self-service company creation — logs the new admin straight in on success. */
-  signup: (input: SignupInput) => Promise<LoginResult>;
   selectCompany: (preAuthToken: string, companyId: string) => Promise<LoginResult>;
   /** Complete an MFA login with the challenge token + a TOTP/backup code. */
   verifyMfa: (mfaToken: string, code: string) => Promise<LoginResult>;
@@ -70,15 +67,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }, [loadCurrentUser]);
 
-  const signup = useCallback(async (input: SignupInput) => {
-    const result = await signupApi(input);
-    if (result.status === 'authenticated') {
-      tokenStore.set(result.accessToken);
-      await loadCurrentUser();
-    }
-    return result;
-  }, [loadCurrentUser]);
-
   const selectCompany = useCallback(async (preAuthToken: string, companyId: string) => {
     const result = await authApi.selectCompany(preAuthToken, companyId);
     if (result.status === 'authenticated') {
@@ -110,8 +98,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, can, login, signup, selectCompany, verifyMfa, logout }),
-    [status, user, can, login, signup, selectCompany, verifyMfa, logout],
+    () => ({ status, user, can, login, selectCompany, verifyMfa, logout }),
+    [status, user, can, login, selectCompany, verifyMfa, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

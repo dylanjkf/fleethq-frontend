@@ -3,7 +3,6 @@ import { Outlet } from 'react-router';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { CommandPalette } from '@/components/layout/CommandPalette';
-import { TrialBanner } from '@/components/layout/TrialBanner';
 
 /** Shown briefly while a code-split route chunk loads. */
 function RouteFallback() {
@@ -23,7 +22,6 @@ export function AppShell() {
     <div className="app-surface flex h-screen">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TrialBanner />
         <Topbar />
         <main className="flex-1 overflow-y-auto p-6">
           <Suspense fallback={<RouteFallback />}>

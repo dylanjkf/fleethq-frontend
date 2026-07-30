@@ -25,9 +25,6 @@ function withAuth(granted: Set<string>, children: React.ReactNode) {
     login: async () => {
       throw new Error('not implemented in test');
     },
-    signup: async () => {
-      throw new Error('not implemented in test');
-    },
     selectCompany: async () => {
       throw new Error('not implemented in test');
     },
