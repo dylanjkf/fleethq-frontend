@@ -6,7 +6,15 @@ export async function getMyCompany(): Promise<Company> {
   return data;
 }
 
-export async function updateMyCompany(input: { name?: string; supportPhone?: string; supportNotes?: string }): Promise<Company> {
+export async function updateMyCompany(input: {
+  name?: string;
+  supportPhone?: string;
+  supportNotes?: string;
+  abn?: string;
+  industry?: string;
+  phone?: string;
+  fleetSizeEstimate?: number;
+}): Promise<Company> {
   const { data } = await apiClient.patch<Company>('/v1/companies/me', input);
   return data;
 }

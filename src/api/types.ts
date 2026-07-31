@@ -542,6 +542,13 @@ export interface Company {
   jurisdiction: string;
   supportPhone: string | null;
   supportNotes: string | null;
+  /** Auth/Billing Platform Phase 4 (registration depth) — org intake fields, all optional. */
+  abn: string | null;
+  industry: string | null;
+  phone: string | null;
+  fleetSizeEstimate: number | null;
+  /** When this company's admin accepted the Terms of Service/Privacy Policy — null for companies provisioned before this field existed. */
+  termsAcceptedAt: string | null;
   createdAt: string;
   updatedAt: string;
   archivedAt: string | null;
