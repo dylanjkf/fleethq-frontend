@@ -597,6 +597,17 @@ export interface MfaSetup {
   otpauthUrl: string;
 }
 
+export interface SessionSummary {
+  id: string;
+  ipAddress: string;
+  userAgent: string | null;
+  deviceLabel: string | null;
+  createdAt: string;
+  lastSeenAt: string;
+  expiresAt: string;
+  isCurrent: boolean;
+}
+
 export interface HealthCheckResult {
   status: 'ok' | 'error' | 'shutting_down';
   info?: Record<string, { status: string }>;

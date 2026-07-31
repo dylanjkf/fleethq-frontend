@@ -13,10 +13,10 @@ export interface AuthContextValue {
   user: CurrentUser | null;
   /** Server-truth permission check — never a hardcoded role/name comparison. */
   can: (permission: PermissionKey) => boolean;
-  login: (username: string, password: string) => Promise<LoginResult>;
+  login: (username: string, password: string, rememberMe?: boolean) => Promise<LoginResult>;
   selectCompany: (preAuthToken: string, companyId: string) => Promise<LoginResult>;
   /** Complete an MFA login with the challenge token + a TOTP/backup code. */
-  verifyMfa: (mfaToken: string, code: string) => Promise<LoginResult>;
+  verifyMfa: (mfaToken: string, code: string, rememberDevice?: boolean) => Promise<LoginResult>;
   logout: () => void;
 }
 
@@ -58,8 +58,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
   }, [queryClient]);
 
-  const login = useCallback(async (username: string, password: string) => {
-    const result = await authApi.login(username, password);
+  const login = useCallback(async (username: string, password: string, rememberMe?: boolean) => {
+    const result = await authApi.login(username, password, authApi.getOrCreateDeviceFingerprint(), rememberMe);
     if (result.status === 'authenticated') {
       tokenStore.set(result.accessToken);
       await loadCurrentUser();
@@ -76,8 +76,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }, [loadCurrentUser]);
 
-  const verifyMfa = useCallback(async (mfaToken: string, code: string) => {
-    const result = await authApi.verifyMfa(mfaToken, code);
+  const verifyMfa = useCallback(async (mfaToken: string, code: string, rememberDevice?: boolean) => {
+    const result = await authApi.verifyMfa(mfaToken, code, rememberDevice);
     if (result.status === 'authenticated') {
       tokenStore.set(result.accessToken);
       await loadCurrentUser();
@@ -86,6 +86,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [loadCurrentUser]);
 
   const logout = useCallback(() => {
+    // Best-effort — revoke the session server-side, but a slow/failed request
+    // must never block the local sign-out.
+    void authApi.logout().catch(() => undefined);
     tokenStore.clear();
     setUser(null);
     setStatus('unauthenticated');

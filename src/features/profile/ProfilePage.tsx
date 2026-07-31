@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { PERMISSION_CATALOG } from '@/lib/permissions';
 import { MfaCard } from './MfaCard';
+import { SessionsCard } from './SessionsCard';
 
 export function ProfilePage() {
   const { user } = useAuth();
@@ -54,6 +55,8 @@ export function ProfilePage() {
       </Card>
 
       <MfaCard initiallyEnabled={user.mfaEnabled} />
+
+      <SessionsCard />
 
       <Card className="max-w-lg">
         <CardHeader className="flex-col items-start gap-1">

@@ -30,6 +30,8 @@ export function LoginPage() {
   } | null>(null);
   const [mfaToken, setMfaToken] = useState<string | null>(null);
   const [selecting, setSelecting] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberDevice, setRememberDevice] = useState(false);
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
@@ -54,7 +56,7 @@ export function LoginPage() {
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setFormError(null);
     try {
-      handleResult(await login(values.username, values.password));
+      handleResult(await login(values.username, values.password, rememberMe));
     } catch (err) {
       setFormError(err instanceof ApiClientError ? err.message : 'Something went wrong. Try again.');
     }
@@ -64,7 +66,7 @@ export function LoginPage() {
     if (!mfaToken) return;
     setFormError(null);
     try {
-      handleResult(await verifyMfa(mfaToken, values.code.trim()));
+      handleResult(await verifyMfa(mfaToken, values.code.trim(), rememberDevice));
     } catch (err) {
       setFormError(err instanceof ApiClientError ? err.message : 'That code is incorrect.');
     }
@@ -114,6 +116,10 @@ export function LoginPage() {
                     </FormItem>
                   )}
                 />
+                <label className="flex items-center gap-2 text-sm text-(--text-tertiary)">
+                  <input type="checkbox" checked={rememberDevice} onChange={(e) => setRememberDevice(e.target.checked)} />
+                  Remember this device for 30 days
+                </label>
                 {formError && <p className="text-sm text-danger-500">{formError}</p>}
                 <Button type="submit" className="w-full" disabled={mfaForm.formState.isSubmitting}>
                   {mfaForm.formState.isSubmitting ? 'Verifying…' : 'Verify'}
@@ -164,6 +170,10 @@ export function LoginPage() {
                     </FormItem>
                   )}
                 />
+                <label className="flex items-center gap-2 text-sm text-(--text-tertiary)">
+                  <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+                  Remember me for 30 days
+                </label>
                 {formError && <p className="text-sm text-danger-500">{formError}</p>}
                 <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
                   {form.formState.isSubmitting ? 'Signing in…' : 'Sign in'}

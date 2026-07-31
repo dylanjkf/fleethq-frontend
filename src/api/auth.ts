@@ -1,14 +1,14 @@
 import { apiClient } from './client';
-import type { CurrentUser, LoginResult, MfaSetup } from './types';
+import type { CurrentUser, LoginResult, MfaSetup, SessionSummary } from './types';
 
-export async function login(username: string, password: string): Promise<LoginResult> {
-  const { data } = await apiClient.post<LoginResult>('/v1/auth/login', { username, password });
+export async function login(username: string, password: string, deviceFingerprint?: string, rememberMe?: boolean): Promise<LoginResult> {
+  const { data } = await apiClient.post<LoginResult>('/v1/auth/login', { username, password, deviceFingerprint, rememberMe });
   return data;
 }
 
 /** Complete an MFA login: exchange the challenge token + a code for a session. */
-export async function verifyMfa(mfaToken: string, code: string): Promise<LoginResult> {
-  const { data } = await apiClient.post<LoginResult>('/v1/auth/mfa/verify', { mfaToken, code });
+export async function verifyMfa(mfaToken: string, code: string, rememberDevice?: boolean): Promise<LoginResult> {
+  const { data } = await apiClient.post<LoginResult>('/v1/auth/mfa/verify', { mfaToken, code, rememberDevice });
   return data;
 }
 
@@ -56,4 +56,28 @@ export async function verifyEmail(token: string): Promise<void> {
 
 export async function resendVerification(identifier: string): Promise<void> {
   await apiClient.post('/v1/auth/resend-verification', { identifier });
+}
+
+export async function listSessions(): Promise<SessionSummary[]> {
+  const { data } = await apiClient.get<SessionSummary[]>('/v1/auth/sessions');
+  return data;
+}
+
+export async function revokeSession(sessionId: string): Promise<void> {
+  await apiClient.delete(`/v1/auth/sessions/${sessionId}`);
+}
+
+export async function logout(): Promise<void> {
+  await apiClient.post('/v1/auth/logout');
+}
+
+/** A device fingerprint generated once per browser and persisted — lets a trusted device skip the MFA challenge. */
+export function getOrCreateDeviceFingerprint(): string {
+  const KEY = 'fleethq.deviceFingerprint';
+  let value = localStorage.getItem(KEY);
+  if (!value) {
+    value = crypto.randomUUID();
+    localStorage.setItem(KEY, value);
+  }
+  return value;
 }

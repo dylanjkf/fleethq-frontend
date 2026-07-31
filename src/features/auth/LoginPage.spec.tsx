@@ -57,7 +57,7 @@ describe('LoginPage', () => {
     await user.type(screen.getByLabelText(/password/i), 'fleetos-dev-password');
     await user.click(screen.getByRole('button', { name: /log in|sign in/i }));
 
-    await waitFor(() => expect(login).toHaveBeenCalledWith('admin@acme', 'fleetos-dev-password'));
+    await waitFor(() => expect(login).toHaveBeenCalledWith('admin@acme', 'fleetos-dev-password', false));
     await waitFor(() => expect(navigateMock).toHaveBeenCalledWith('/', { replace: true }));
   });
 
