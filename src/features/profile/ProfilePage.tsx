@@ -6,6 +6,7 @@ import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { PERMISSION_CATALOG } from '@/lib/permissions';
 import { MfaCard } from './MfaCard';
+import { PasskeysCard } from './PasskeysCard';
 import { SessionsCard } from './SessionsCard';
 
 export function ProfilePage() {
@@ -55,6 +56,8 @@ export function ProfilePage() {
       </Card>
 
       <MfaCard initiallyEnabled={user.mfaEnabled} />
+
+      <PasskeysCard />
 
       <SessionsCard />
 

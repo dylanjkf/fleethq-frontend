@@ -1,5 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { startAuthentication } from '@simplewebauthn/browser';
 import * as authApi from '@/api/auth';
 import { setUnauthorizedHandler } from '@/api/client';
 import { tokenStore } from '@/api/token-store';
@@ -17,6 +18,12 @@ export interface AuthContextValue {
   selectCompany: (preAuthToken: string, companyId: string) => Promise<LoginResult>;
   /** Complete an MFA login with the challenge token + a TOTP/backup code. */
   verifyMfa: (mfaToken: string, code: string, rememberDevice?: boolean) => Promise<LoginResult>;
+  /** Passwordless login from a clicked magic-link (?token=...). */
+  loginWithMagicLink: (token: string, rememberMe?: boolean) => Promise<LoginResult>;
+  /** A verified id_token from Google/Microsoft's own client-side SDK. */
+  loginWithOAuth: (provider: 'google' | 'microsoft', idToken: string, rememberMe?: boolean) => Promise<LoginResult>;
+  /** Usernameless passkey login — drives the browser's own credential picker. */
+  loginWithPasskey: () => Promise<LoginResult>;
   logout: () => void;
 }
 
@@ -85,6 +92,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }, [loadCurrentUser]);
 
+  const loginWithMagicLink = useCallback(async (token: string, rememberMe?: boolean) => {
+    const result = await authApi.consumeMagicLink(token, authApi.getOrCreateDeviceFingerprint(), rememberMe);
+    if (result.status === 'authenticated') {
+      tokenStore.set(result.accessToken);
+      await loadCurrentUser();
+    }
+    return result;
+  }, [loadCurrentUser]);
+
+  const loginWithOAuth = useCallback(async (provider: 'google' | 'microsoft', idToken: string, rememberMe?: boolean) => {
+    const result = await authApi.loginWithOAuth(provider, idToken, authApi.getOrCreateDeviceFingerprint(), rememberMe);
+    if (result.status === 'authenticated') {
+      tokenStore.set(result.accessToken);
+      await loadCurrentUser();
+    }
+    return result;
+  }, [loadCurrentUser]);
+
+  const loginWithPasskey = useCallback(async () => {
+    const { options, challengeToken } = await authApi.beginWebauthnLogin();
+    const response = await startAuthentication({ optionsJSON: options });
+    const result = await authApi.verifyWebauthnLogin(challengeToken, response);
+    if (result.status === 'authenticated') {
+      tokenStore.set(result.accessToken);
+      await loadCurrentUser();
+    }
+    return result;
+  }, [loadCurrentUser]);
+
   const logout = useCallback(() => {
     // Best-effort — revoke the session server-side, but a slow/failed request
     // must never block the local sign-out.
@@ -101,8 +137,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, can, login, selectCompany, verifyMfa, logout }),
-    [status, user, can, login, selectCompany, verifyMfa, logout],
+    () => ({ status, user, can, login, selectCompany, verifyMfa, loginWithMagicLink, loginWithOAuth, loginWithPasskey, logout }),
+    [status, user, can, login, selectCompany, verifyMfa, loginWithMagicLink, loginWithOAuth, loginWithPasskey, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -4,7 +4,7 @@ import { ProtectedRoute } from '@/app/ProtectedRoute';
 // Auth + shell stay eager — they're on the critical first-paint / login path.
 import { LoginPage } from '@/features/auth/LoginPage';
 import { ContactPage } from '@/features/auth/ContactPage';
-import { ForgotPasswordPage, ResetPasswordPage, VerifyEmailPage } from '@/features/auth/AuthActionPages';
+import { ForgotPasswordPage, MagicLinkPage, OAuthCallbackPage, ResetPasswordPage, VerifyEmailPage } from '@/features/auth/AuthActionPages';
 import { NotFoundPage } from '@/features/shared/NotFoundPage';
 // Feature pages are code-split (React.lazy, in ./lazyPages) — each route ships
 // as its own chunk fetched on first navigation. The Suspense boundary lives in
@@ -29,6 +29,8 @@ export const routes: RouteObject[] = [
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
   { path: '/verify-email', element: <VerifyEmailPage /> },
+  { path: '/magic-link', element: <MagicLinkPage /> },
+  { path: '/oauth-callback', element: <OAuthCallbackPage /> },
   {
     element: <ProtectedRoute />,
     children: [

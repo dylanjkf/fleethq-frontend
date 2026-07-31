@@ -4,6 +4,7 @@ import { requestPasswordReset, resendVerification, resetPassword, verifyEmail } 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useAuth } from '@/hooks/useAuth';
 
 function Shell({ title, description, children }: { title: string; description: string; children: React.ReactNode }) {
   return (
@@ -172,5 +173,72 @@ export function VerifyEmailPage() {
         ))}
       <Link to="/login" className="mt-4 block text-sm font-medium text-accent-600">→ Go to sign in</Link>
     </Shell>
+  );
+}
+
+/**
+ * Consumes a clicked magic-link (?token=...) on mount. An `authenticated`
+ * result signs the user straight in; an `mfa_required`/`choose_company`
+ * result still needs LoginPage's own UI, so it's handed off via router state
+ * rather than duplicated here (see LoginPage's `pendingResult` effect).
+ */
+export function MagicLinkPage() {
+  const [params] = useSearchParams();
+  const token = params.get('token') ?? '';
+  const navigate = useNavigate();
+  const { loginWithMagicLink } = useAuth();
+  const [state, setState] = useState<'working' | 'error'>('working');
+
+  useEffect(() => {
+    if (!token) {
+      setState('error');
+      return;
+    }
+    loginWithMagicLink(token)
+      .then((result) => {
+        if (result.status === 'authenticated') {
+          navigate('/', { replace: true });
+        } else {
+          navigate('/login', { replace: true, state: { pendingResult: result } });
+        }
+      })
+      .catch(() => setState('error'));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
+
+  if (state === 'error') {
+    return (
+      <Shell title="Sign-in link expired" description="This link is invalid or has already been used.">
+        <p className="text-sm text-(--text-secondary)">Magic links work once and expire after 15 minutes. Request a fresh one from the sign-in page.</p>
+        <Link to="/login" className="mt-4 block text-sm font-medium text-accent-600">← Back to sign in</Link>
+      </Shell>
+    );
+  }
+
+  return (
+    <Shell title="Signing you in…" description="Verifying your sign-in link.">
+      <p className="text-sm text-(--text-secondary)">One moment…</p>
+    </Shell>
+  );
+}
+
+/**
+ * The popup redirect target for social login. `LoginPage`'s own
+ * `signInWithOidcPopup` helper polls the popup's location and does all the
+ * real work by reading the URL fragment itself — this page only needs to
+ * exist so the provider has somewhere to land instead of a 404, and closes
+ * itself immediately after paint.
+ */
+export function OAuthCallbackPage() {
+  useEffect(() => {
+    // Give the opener's poll one tick to read location.href before closing.
+    const timer = setTimeout(() => window.close(), 50);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-(--surface-1) p-4">
+      <p className="text-sm text-(--text-secondary)">Signing you in…</p>
+    </div>
   );
 }

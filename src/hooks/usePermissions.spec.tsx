@@ -31,6 +31,15 @@ function withAuth(granted: Set<string>, children: React.ReactNode) {
     verifyMfa: async () => {
       throw new Error('not implemented in test');
     },
+    loginWithMagicLink: async () => {
+      throw new Error('not implemented in test');
+    },
+    loginWithOAuth: async () => {
+      throw new Error('not implemented in test');
+    },
+    loginWithPasskey: async () => {
+      throw new Error('not implemented in test');
+    },
     logout: () => {},
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -597,6 +597,20 @@ export interface MfaSetup {
   otpauthUrl: string;
 }
 
+export interface AuthProviders {
+  magicLink: true;
+  webauthn: true;
+  google: boolean;
+  microsoft: boolean;
+}
+
+export interface PasskeySummary {
+  id: string;
+  deviceLabel: string | null;
+  createdAt: string;
+  lastUsedAt: string;
+}
+
 export interface SessionSummary {
   id: string;
   ipAddress: string;

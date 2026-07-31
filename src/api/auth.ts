@@ -1,5 +1,6 @@
+import type { AuthenticationResponseJSON, PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON, RegistrationResponseJSON } from '@simplewebauthn/browser';
 import { apiClient } from './client';
-import type { CurrentUser, LoginResult, MfaSetup, SessionSummary } from './types';
+import type { AuthProviders, CurrentUser, LoginResult, MfaSetup, PasskeySummary, SessionSummary } from './types';
 
 export async function login(username: string, password: string, deviceFingerprint?: string, rememberMe?: boolean): Promise<LoginResult> {
   const { data } = await apiClient.post<LoginResult>('/v1/auth/login', { username, password, deviceFingerprint, rememberMe });
@@ -80,4 +81,64 @@ export function getOrCreateDeviceFingerprint(): string {
     localStorage.setItem(KEY, value);
   }
   return value;
+}
+
+/** Which passwordless/social sign-in options the login page should offer. */
+export async function getAuthProviders(): Promise<AuthProviders> {
+  const { data } = await apiClient.get<AuthProviders>('/v1/auth/providers');
+  return data;
+}
+
+// ── Magic link ────────────────────────────────────────────────────────────
+
+export async function requestMagicLink(identifier: string): Promise<void> {
+  await apiClient.post('/v1/auth/magic-link/request', { identifier });
+}
+
+export async function consumeMagicLink(token: string, deviceFingerprint?: string, rememberMe?: boolean): Promise<LoginResult> {
+  const { data } = await apiClient.post<LoginResult>('/v1/auth/magic-link/consume', { token, deviceFingerprint, rememberMe });
+  return data;
+}
+
+// ── Social login ──────────────────────────────────────────────────────────
+
+export async function loginWithOAuth(
+  provider: 'google' | 'microsoft',
+  idToken: string,
+  deviceFingerprint?: string,
+  rememberMe?: boolean,
+): Promise<LoginResult> {
+  const { data } = await apiClient.post<LoginResult>(`/v1/auth/oauth/${provider}/login`, { idToken, deviceFingerprint, rememberMe });
+  return data;
+}
+
+// ── WebAuthn / passkeys ───────────────────────────────────────────────────
+
+export async function beginWebauthnRegistration(): Promise<{ options: PublicKeyCredentialCreationOptionsJSON; challengeToken: string }> {
+  const { data } = await apiClient.post('/v1/auth/webauthn/register/options');
+  return data;
+}
+
+export async function verifyWebauthnRegistration(challengeToken: string, response: RegistrationResponseJSON, deviceLabel?: string): Promise<void> {
+  await apiClient.post('/v1/auth/webauthn/register/verify', { challengeToken, response, deviceLabel });
+}
+
+export async function listPasskeys(): Promise<PasskeySummary[]> {
+  const { data } = await apiClient.get<PasskeySummary[]>('/v1/auth/webauthn/credentials');
+  return data;
+}
+
+export async function removePasskey(id: string): Promise<void> {
+  await apiClient.delete(`/v1/auth/webauthn/credentials/${id}`);
+}
+
+/** Usernameless — no identifier needed; the platform's own credential picker handles it. */
+export async function beginWebauthnLogin(): Promise<{ options: PublicKeyCredentialRequestOptionsJSON; challengeToken: string }> {
+  const { data } = await apiClient.post('/v1/auth/webauthn/login/options');
+  return data;
+}
+
+export async function verifyWebauthnLogin(challengeToken: string, response: AuthenticationResponseJSON): Promise<LoginResult> {
+  const { data } = await apiClient.post<LoginResult>('/v1/auth/webauthn/login/verify', { challengeToken, response });
+  return data;
 }

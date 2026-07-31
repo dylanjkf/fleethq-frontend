@@ -12,6 +12,11 @@ vi.mock('react-router', async (importOriginal) => {
   return { ...actual, useNavigate: () => navigateMock };
 });
 
+vi.mock('@/api/auth', () => ({
+  getAuthProviders: vi.fn().mockResolvedValue({ magicLink: true, webauthn: true, google: false, microsoft: false }),
+  requestMagicLink: vi.fn(),
+}));
+
 function renderWithAuth(overrides: Partial<AuthContextValue> = {}) {
   const value: AuthContextValue = {
     status: 'unauthenticated',
@@ -20,6 +25,9 @@ function renderWithAuth(overrides: Partial<AuthContextValue> = {}) {
     login: vi.fn(),
     selectCompany: vi.fn(),
     verifyMfa: vi.fn(),
+    loginWithMagicLink: vi.fn(),
+    loginWithOAuth: vi.fn(),
+    loginWithPasskey: vi.fn(),
     logout: vi.fn(),
     ...overrides,
   };
