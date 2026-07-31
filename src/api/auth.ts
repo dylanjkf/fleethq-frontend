@@ -1,6 +1,6 @@
 import type { AuthenticationResponseJSON, PublicKeyCredentialCreationOptionsJSON, PublicKeyCredentialRequestOptionsJSON, RegistrationResponseJSON } from '@simplewebauthn/browser';
 import { apiClient } from './client';
-import type { AuthProviders, CurrentUser, LoginResult, MfaSetup, PasskeySummary, SessionSummary } from './types';
+import type { AuthProviders, CurrentUser, LoginResult, MfaSetup, PasskeySummary, SecuritySettings, SessionSummary } from './types';
 
 export async function login(username: string, password: string, deviceFingerprint?: string, rememberMe?: boolean): Promise<LoginResult> {
   const { data } = await apiClient.post<LoginResult>('/v1/auth/login', { username, password, deviceFingerprint, rememberMe });
@@ -140,5 +140,42 @@ export async function beginWebauthnLogin(): Promise<{ options: PublicKeyCredenti
 
 export async function verifyWebauthnLogin(challengeToken: string, response: AuthenticationResponseJSON): Promise<LoginResult> {
   const { data } = await apiClient.post<LoginResult>('/v1/auth/webauthn/login/verify', { challengeToken, response });
+  return data;
+}
+
+// ── Password policy + mandatory MFA (Auth/Billing Platform Phase 3) ──────────
+
+/** Step 1 of forced MFA enrolment (a login blocked by mfa_setup_required): the secret + otpauth URI, same shape as self-service setupMfa. */
+export async function beginPolicyMfaSetup(setupToken: string): Promise<MfaSetup> {
+  const { data } = await apiClient.post<MfaSetup>('/v1/auth/mfa-setup/begin', { setupToken });
+  return data;
+}
+
+/** Step 2: confirm the code, activating MFA and finishing the login it was blocking. */
+export async function confirmPolicyMfaSetup(setupToken: string, code: string): Promise<LoginResult & { backupCodes: string[] }> {
+  const { data } = await apiClient.post<LoginResult & { backupCodes: string[] }>('/v1/auth/mfa-setup/confirm', { setupToken, code });
+  return data;
+}
+
+/** Set a new password when a login was redirected here by a password-expiry policy, then finish the login. */
+export async function changeExpiredPassword(changeToken: string, newPassword: string): Promise<LoginResult> {
+  const { data } = await apiClient.post<LoginResult>('/v1/auth/password-expired/change', { changeToken, newPassword });
+  return data;
+}
+
+/** Self-service password change while already signed in — requires the current password. */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  await apiClient.post('/v1/auth/change-password', { currentPassword, newPassword });
+}
+
+// ── Company security policy (Auth/Billing Platform Phase 3) ─────────────────
+
+export async function getSecuritySettings(): Promise<SecuritySettings> {
+  const { data } = await apiClient.get<SecuritySettings>('/v1/security-settings');
+  return data;
+}
+
+export async function updateSecuritySettings(input: { mfaRequired?: boolean; passwordExpiryDays?: number | null }): Promise<SecuritySettings> {
+  const { data } = await apiClient.put<SecuritySettings>('/v1/security-settings', input);
   return data;
 }

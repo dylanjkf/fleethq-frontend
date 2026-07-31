@@ -14,6 +14,7 @@ const testUser: CurrentUser = {
   role: { id: 'r1', name: 'Test Role' },
   permissions: [],
   mfaEnabled: false,
+  mfaRequiredByCompany: false,
   operator: null,
 };
 
@@ -38,6 +39,12 @@ function withAuth(granted: Set<string>, children: React.ReactNode) {
       throw new Error('not implemented in test');
     },
     loginWithPasskey: async () => {
+      throw new Error('not implemented in test');
+    },
+    confirmPolicyMfaSetup: async () => {
+      throw new Error('not implemented in test');
+    },
+    changeExpiredPassword: async () => {
       throw new Error('not implemented in test');
     },
     logout: () => {},

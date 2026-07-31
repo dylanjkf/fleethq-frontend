@@ -12,8 +12,12 @@ type Mode = 'idle' | 'enrolling' | 'backup';
  * Self-service MFA (TOTP) enrolment on the profile page. Two-step commit: begin
  * setup to get a secret, add it to an authenticator app, then confirm a code to
  * activate — after which one-time backup codes are shown exactly once.
+ *
+ * `requiredByCompany` (Auth/Billing Platform Phase 3) disables "Disable" —
+ * this account's company mandates MFA, so turning it off here would just get
+ * the user redirected straight back into forced enrolment at next sign-in.
  */
-export function MfaCard({ initiallyEnabled }: { initiallyEnabled: boolean }) {
+export function MfaCard({ initiallyEnabled, requiredByCompany }: { initiallyEnabled: boolean; requiredByCompany: boolean }) {
   const [enabled, setEnabled] = useState(initiallyEnabled);
   const [mode, setMode] = useState<Mode>('idle');
   const [secret, setSecret] = useState<string | null>(null);
@@ -128,7 +132,12 @@ export function MfaCard({ initiallyEnabled }: { initiallyEnabled: boolean }) {
             {busy ? 'Starting…' : 'Enable two-factor authentication'}
           </Button>
         )}
-        {mode === 'idle' && enabled && (
+        {mode === 'idle' && enabled && requiredByCompany && (
+          <p className="text-(--text-secondary)">
+            Your company requires two-factor authentication for all sign-ins, so it can&apos;t be turned off here.
+          </p>
+        )}
+        {mode === 'idle' && enabled && !requiredByCompany && (
           <div className="space-y-2">
             <p className="text-(--text-secondary)">To turn off, enter a current code or a backup code:</p>
             <Input inputMode="numeric" placeholder="123456 or backup code" value={code} onChange={(e) => setCode(e.target.value)} />

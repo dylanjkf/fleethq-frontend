@@ -576,7 +576,11 @@ export interface CompanyChoice {
 export type LoginResult =
   | { status: 'authenticated'; accessToken: string; company: CompanyChoice }
   | { status: 'choose_company'; preAuthToken: string; companies: CompanyChoice[] }
-  | { status: 'mfa_required'; mfaToken: string };
+  | { status: 'mfa_required'; mfaToken: string }
+  /** Auth/Billing Platform Phase 3: this company mandates MFA and the account doesn't have it enabled yet. */
+  | { status: 'mfa_setup_required'; setupToken: string }
+  /** Auth/Billing Platform Phase 3: this company's password-expiry policy requires a new password before continuing. */
+  | { status: 'password_expired'; changeToken: string };
 
 export interface CurrentUser {
   userId: string;
@@ -588,8 +592,19 @@ export interface CurrentUser {
   permissions: string[];
   /** Whether this account has multi-factor authentication enabled. */
   mfaEnabled: boolean;
+  /** Auth/Billing Platform Phase 3: this company's policy mandates MFA — the Profile page disables "Disable MFA" and explains why. */
+  mfaRequiredByCompany: boolean;
   /** Set if this login is also an Operator's DriverOS login (DriverOS v0 milestone). */
   operator: { id: string; fullName: string } | null;
+}
+
+/** A company's MFA/password-expiry policy (Auth/Billing Platform Phase 3). */
+export interface SecuritySettings {
+  mfaRequired: boolean;
+  /** `null` means no expiry policy. */
+  passwordExpiryDays: number | null;
+  /** True if the company has never set its own policy (platform defaults apply). */
+  isDefault: boolean;
 }
 
 export interface MfaSetup {

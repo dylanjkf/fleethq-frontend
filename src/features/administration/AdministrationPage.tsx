@@ -10,6 +10,7 @@ import { DashboardLayoutsTab } from '@/features/administration/DashboardLayoutsT
 import { AddressBooksTab } from '@/features/administration/AddressBooksTab';
 import { AnalyticsTab } from '@/features/administration/AnalyticsTab';
 import { BarcodeConfigTab } from '@/features/administration/BarcodeConfigTab';
+import { SecuritySettingsTab } from '@/features/administration/SecuritySettingsTab';
 import { usePermissions } from '@/hooks/usePermissions';
 import { PERMISSIONS } from '@/lib/permissions';
 
@@ -26,6 +27,7 @@ export function AdministrationPage() {
     can(PERMISSIONS.ADDRESS_BOOK_MANAGE) && { value: 'address-books', label: 'Address books', content: <AddressBooksTab /> },
     can(PERMISSIONS.ANALYTICS_MANAGE) && { value: 'analytics', label: 'Analytics', content: <AnalyticsTab /> },
     can(PERMISSIONS.BARCODE_CONFIG_MANAGE) && { value: 'barcode', label: 'Barcode scanning', content: <BarcodeConfigTab /> },
+    can(PERMISSIONS.SECURITY_POLICY_MANAGE) && { value: 'security', label: 'Security', content: <SecuritySettingsTab /> },
   ].filter(Boolean) as { value: string; label: string; content: React.ReactNode }[];
 
   if (tabs.length === 0) {

@@ -15,6 +15,7 @@ vi.mock('react-router', async (importOriginal) => {
 vi.mock('@/api/auth', () => ({
   getAuthProviders: vi.fn().mockResolvedValue({ magicLink: true, webauthn: true, google: false, microsoft: false }),
   requestMagicLink: vi.fn(),
+  beginPolicyMfaSetup: vi.fn(),
 }));
 
 function renderWithAuth(overrides: Partial<AuthContextValue> = {}) {
@@ -28,6 +29,8 @@ function renderWithAuth(overrides: Partial<AuthContextValue> = {}) {
     loginWithMagicLink: vi.fn(),
     loginWithOAuth: vi.fn(),
     loginWithPasskey: vi.fn(),
+    confirmPolicyMfaSetup: vi.fn(),
+    changeExpiredPassword: vi.fn(),
     logout: vi.fn(),
     ...overrides,
   };

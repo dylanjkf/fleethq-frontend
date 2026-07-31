@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { ApiClientError } from '@/api/client';
-import { getAuthProviders, requestMagicLink } from '@/api/auth';
+import { beginPolicyMfaSetup, getAuthProviders, requestMagicLink } from '@/api/auth';
 import type { AuthProviders, CompanyChoice, LoginResult } from '@/api/types';
 import { googleAuthorizeUrl, microsoftAuthorizeUrl, signInWithOidcPopup } from '@/lib/oauth-popup';
 
@@ -27,12 +27,23 @@ const magicLinkSchema = z.object({
   identifier: z.string().min(1, 'Required'),
 });
 
+const policyMfaSchema = z.object({
+  code: z.string().min(6, 'Enter the 6-digit code from your authenticator app'),
+});
+
+const newPasswordSchema = z
+  .object({
+    newPassword: z.string().min(8, 'At least 8 characters, combining two of: lowercase, uppercase, numbers, symbols'),
+    confirmPassword: z.string(),
+  })
+  .refine((v) => v.newPassword === v.confirmPassword, { message: 'Passwords do not match', path: ['confirmPassword'] });
+
 function errorMessage(err: unknown, fallback: string): string {
   return err instanceof ApiClientError ? err.message : err instanceof Error && err.message ? err.message : fallback;
 }
 
 export function LoginPage() {
-  const { login, selectCompany, verifyMfa, loginWithOAuth, loginWithPasskey } = useAuth();
+  const { login, selectCompany, verifyMfa, loginWithOAuth, loginWithPasskey, confirmPolicyMfaSetup, changeExpiredPassword } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [formError, setFormError] = useState<string | null>(null);
@@ -41,6 +52,12 @@ export function LoginPage() {
     companies: CompanyChoice[];
   } | null>(null);
   const [mfaToken, setMfaToken] = useState<string | null>(null);
+  // Auth/Billing Platform Phase 3: a login blocked by this company's mandatory-MFA
+  // or password-expiry policy hands back a short-lived token instead of a session.
+  const [mfaSetup, setMfaSetup] = useState<{ setupToken: string; secret: string; otpauthUrl: string } | null>(null);
+  const [mfaSetupBackupCodes, setMfaSetupBackupCodes] = useState<string[] | null>(null);
+  const [pendingAfterBackupCodes, setPendingAfterBackupCodes] = useState<LoginResult | null>(null);
+  const [passwordExpiredToken, setPasswordExpiredToken] = useState<string | null>(null);
   const [selecting, setSelecting] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const [rememberDevice, setRememberDevice] = useState(false);
@@ -66,13 +83,37 @@ export function LoginPage() {
     resolver: zodResolver(magicLinkSchema),
     defaultValues: { identifier: '' },
   });
+  const policyMfaForm = useForm<z.infer<typeof policyMfaSchema>>({
+    resolver: zodResolver(policyMfaSchema),
+    defaultValues: { code: '' },
+  });
+  const newPasswordForm = useForm<z.infer<typeof newPasswordSchema>>({
+    resolver: zodResolver(newPasswordSchema),
+    defaultValues: { newPassword: '', confirmPassword: '' },
+  });
 
-  /** Route a login/verify result to the next step (session, MFA, or chooser). */
-  function handleResult(result: LoginResult) {
+  /**
+   * Route a login/verify result to the next step. `mfa_setup_required` and
+   * `password_expired` (Auth/Billing Platform Phase 3) can also chain into
+   * each other once resolved — e.g. finishing forced MFA enrolment can still
+   * come back `password_expired` if the same company also enforces password
+   * expiry — so every completion path funnels back through here rather than
+   * assuming `authenticated` is the only next state.
+   */
+  async function handleResult(result: LoginResult) {
     if (result.status === 'authenticated') {
       navigate('/', { replace: true });
     } else if (result.status === 'mfa_required') {
       setMfaToken(result.mfaToken);
+    } else if (result.status === 'mfa_setup_required') {
+      try {
+        const { secret, otpauthUrl } = await beginPolicyMfaSetup(result.setupToken);
+        setMfaSetup({ setupToken: result.setupToken, secret, otpauthUrl });
+      } catch (err) {
+        setFormError(errorMessage(err, 'Could not start two-factor setup.'));
+      }
+    } else if (result.status === 'password_expired') {
+      setPasswordExpiredToken(result.changeToken);
     } else {
       setCompanyChoice({ preAuthToken: result.preAuthToken, companies: result.companies });
     }
@@ -83,14 +124,14 @@ export function LoginPage() {
   // this page's MFA/company-chooser UI).
   useEffect(() => {
     const pending = (location.state as { pendingResult?: LoginResult } | null)?.pendingResult;
-    if (pending) handleResult(pending);
+    if (pending) void handleResult(pending);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function onSubmit(values: z.infer<typeof loginSchema>) {
     setFormError(null);
     try {
-      handleResult(await login(values.username, values.password, rememberMe));
+      await handleResult(await login(values.username, values.password, rememberMe));
     } catch (err) {
       setFormError(errorMessage(err, 'Something went wrong. Try again.'));
     }
@@ -100,7 +141,7 @@ export function LoginPage() {
     if (!mfaToken) return;
     setFormError(null);
     try {
-      handleResult(await verifyMfa(mfaToken, values.code.trim(), rememberDevice));
+      await handleResult(await verifyMfa(mfaToken, values.code.trim(), rememberDevice));
     } catch (err) {
       setFormError(errorMessage(err, 'That code is incorrect.'));
     }
@@ -111,11 +152,45 @@ export function LoginPage() {
     setSelecting(true);
     setFormError(null);
     try {
-      await selectCompany(companyChoice.preAuthToken, companyId);
-      navigate('/', { replace: true });
+      const result = await selectCompany(companyChoice.preAuthToken, companyId);
+      setCompanyChoice(null);
+      await handleResult(result);
     } catch (err) {
       setFormError(errorMessage(err, 'Something went wrong. Try again.'));
+    } finally {
       setSelecting(false);
+    }
+  }
+
+  async function onSubmitPolicyMfaSetup(values: z.infer<typeof policyMfaSchema>) {
+    if (!mfaSetup) return;
+    setFormError(null);
+    try {
+      const { backupCodes, ...result } = await confirmPolicyMfaSetup(mfaSetup.setupToken, values.code.trim());
+      setMfaSetup(null);
+      setMfaSetupBackupCodes(backupCodes);
+      setPendingAfterBackupCodes(result);
+    } catch (err) {
+      setFormError(errorMessage(err, 'That code is incorrect.'));
+    }
+  }
+
+  async function onContinueAfterBackupCodes() {
+    setMfaSetupBackupCodes(null);
+    const pending = pendingAfterBackupCodes;
+    setPendingAfterBackupCodes(null);
+    if (pending) await handleResult(pending);
+  }
+
+  async function onSubmitPasswordExpired(values: z.infer<typeof newPasswordSchema>) {
+    if (!passwordExpiredToken) return;
+    setFormError(null);
+    try {
+      const result = await changeExpiredPassword(passwordExpiredToken, values.newPassword);
+      setPasswordExpiredToken(null);
+      await handleResult(result);
+    } catch (err) {
+      setFormError(errorMessage(err, 'Could not update your password.'));
     }
   }
 
@@ -132,7 +207,7 @@ export function LoginPage() {
     setFormError(null);
     setPasskeyBusy(true);
     try {
-      handleResult(await loginWithPasskey());
+      await handleResult(await loginWithPasskey());
     } catch (err) {
       setFormError(errorMessage(err, 'Could not sign in with that passkey.'));
     } finally {
@@ -148,26 +223,38 @@ export function LoginPage() {
         clientId: provider === 'google' ? import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID : import.meta.env.VITE_MICROSOFT_OAUTH_CLIENT_ID,
         redirectUri: `${window.location.origin}/oauth-callback`,
       });
-      handleResult(await loginWithOAuth(provider, idToken, rememberMe));
+      await handleResult(await loginWithOAuth(provider, idToken, rememberMe));
     } catch (err) {
       setFormError(errorMessage(err, `Could not sign in with ${provider === 'google' ? 'Google' : 'Microsoft'}.`));
     }
   }
 
-  const title = mfaToken
-    ? 'Two-factor verification'
-    : companyChoice
-      ? 'Choose a company'
-      : mode === 'magic-link' || mode === 'magic-link-sent'
-        ? 'Email me a sign-in link'
-        : 'Sign in to FleetOS';
-  const description = mfaToken
-    ? 'Enter the 6-digit code from your authenticator app (or a backup code).'
-    : companyChoice
-      ? 'Your account has access to more than one company.'
-      : mode === 'magic-link' || mode === 'magic-link-sent'
-        ? "We'll email you a link that signs you in — no password needed."
-        : 'Enter your company-issued username and password.';
+  const title = mfaSetupBackupCodes
+    ? 'Save your backup codes'
+    : mfaSetup
+      ? 'Set up two-factor authentication'
+      : passwordExpiredToken
+        ? 'Choose a new password'
+        : mfaToken
+          ? 'Two-factor verification'
+          : companyChoice
+            ? 'Choose a company'
+            : mode === 'magic-link' || mode === 'magic-link-sent'
+              ? 'Email me a sign-in link'
+              : 'Sign in to FleetOS';
+  const description = mfaSetupBackupCodes
+    ? "Each can be used once if you lose your authenticator. They won't be shown again."
+    : mfaSetup
+      ? 'Your company requires two-factor authentication to sign in.'
+      : passwordExpiredToken
+        ? 'Your company requires a password change before you can continue.'
+        : mfaToken
+          ? 'Enter the 6-digit code from your authenticator app (or a backup code).'
+          : companyChoice
+            ? 'Your account has access to more than one company.'
+            : mode === 'magic-link' || mode === 'magic-link-sent'
+              ? "We'll email you a link that signs you in — no password needed."
+              : 'Enter your company-issued username and password.';
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-(--surface-1) p-4">
@@ -177,8 +264,80 @@ export function LoginPage() {
           <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>
-          {mfaToken ? (
-            <Form {...mfaForm}>
+          {mfaSetupBackupCodes ? (
+            <div key="backup-codes" className="space-y-2">
+              <ul className="grid grid-cols-2 gap-1 rounded bg-(--surface-2) p-2 font-mono text-(--text-primary)">
+                {mfaSetupBackupCodes.map((c) => (
+                  <li key={c}>{c}</li>
+                ))}
+              </ul>
+              <Button className="w-full" onClick={onContinueAfterBackupCodes}>
+                Continue
+              </Button>
+            </div>
+          ) : mfaSetup ? (
+            <Form key="mfa-setup" {...policyMfaForm}>
+              <form onSubmit={policyMfaForm.handleSubmit(onSubmitPolicyMfaSetup)} className="space-y-4">
+                <p className="text-sm text-(--text-secondary)">
+                  In your authenticator app (Google Authenticator, Authy, 1Password…), add an account and enter this key:
+                </p>
+                <code className="block break-all rounded bg-(--surface-2) px-2 py-1 font-mono text-(--text-primary)">{mfaSetup.secret}</code>
+                <FormField
+                  control={policyMfaForm.control}
+                  name="code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Authentication code</FormLabel>
+                      <FormControl>
+                        <Input inputMode="numeric" autoComplete="one-time-code" autoFocus placeholder="123456" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {formError && <p className="text-sm text-danger-500">{formError}</p>}
+                <Button type="submit" className="w-full" disabled={policyMfaForm.formState.isSubmitting}>
+                  {policyMfaForm.formState.isSubmitting ? 'Verifying…' : 'Confirm & continue'}
+                </Button>
+              </form>
+            </Form>
+          ) : passwordExpiredToken ? (
+            <Form key="password-expired" {...newPasswordForm}>
+              <form onSubmit={newPasswordForm.handleSubmit(onSubmitPasswordExpired)} className="space-y-4">
+                <FormField
+                  control={newPasswordForm.control}
+                  name="newPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>New password</FormLabel>
+                      <FormControl>
+                        <Input type="password" autoComplete="new-password" autoFocus {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={newPasswordForm.control}
+                  name="confirmPassword"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Confirm password</FormLabel>
+                      <FormControl>
+                        <Input type="password" autoComplete="new-password" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                {formError && <p className="text-sm text-danger-500">{formError}</p>}
+                <Button type="submit" className="w-full" disabled={newPasswordForm.formState.isSubmitting}>
+                  {newPasswordForm.formState.isSubmitting ? 'Saving…' : 'Update password & continue'}
+                </Button>
+              </form>
+            </Form>
+          ) : mfaToken ? (
+            <Form key="mfa-challenge" {...mfaForm}>
               <form onSubmit={mfaForm.handleSubmit(onSubmitMfa)} className="space-y-4">
                 <FormField
                   control={mfaForm.control}
@@ -204,7 +363,7 @@ export function LoginPage() {
               </form>
             </Form>
           ) : companyChoice ? (
-            <div className="space-y-2">
+            <div key="company-choice" className="space-y-2">
               {companyChoice.companies.map((company) => (
                 <Button
                   key={company.id}
@@ -219,7 +378,7 @@ export function LoginPage() {
               {formError && <p className="text-sm text-danger-500">{formError}</p>}
             </div>
           ) : mode === 'magic-link-sent' ? (
-            <div className="space-y-4">
+            <div key="magic-link-sent" className="space-y-4">
               <p className="text-sm text-(--text-secondary)">
                 If an account matches, a sign-in link is on its way. Check your email and follow the link — it works for 15 minutes.
               </p>
@@ -228,7 +387,7 @@ export function LoginPage() {
               </Button>
             </div>
           ) : mode === 'magic-link' ? (
-            <Form {...magicLinkForm}>
+            <Form key="magic-link" {...magicLinkForm}>
               <form onSubmit={magicLinkForm.handleSubmit(onSubmitMagicLink)} className="space-y-4">
                 <FormField
                   control={magicLinkForm.control}
@@ -253,7 +412,7 @@ export function LoginPage() {
               </form>
             </Form>
           ) : (
-            <div className="space-y-4">
+            <div key="password-login" className="space-y-4">
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                   <FormField

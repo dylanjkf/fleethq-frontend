@@ -5,6 +5,7 @@ import { Panel, PanelDescription, PanelHeader, PanelTitle } from '@/components/u
 import { Separator } from '@/components/ui/separator';
 import { useAuth } from '@/hooks/useAuth';
 import { PERMISSION_CATALOG } from '@/lib/permissions';
+import { ChangePasswordCard } from './ChangePasswordCard';
 import { MfaCard } from './MfaCard';
 import { PasskeysCard } from './PasskeysCard';
 import { SessionsCard } from './SessionsCard';
@@ -55,7 +56,9 @@ export function ProfilePage() {
         </CardContent>
       </Card>
 
-      <MfaCard initiallyEnabled={user.mfaEnabled} />
+      <MfaCard initiallyEnabled={user.mfaEnabled} requiredByCompany={user.mfaRequiredByCompany} />
+
+      <ChangePasswordCard />
 
       <PasskeysCard />
 

@@ -24,6 +24,10 @@ export interface AuthContextValue {
   loginWithOAuth: (provider: 'google' | 'microsoft', idToken: string, rememberMe?: boolean) => Promise<LoginResult>;
   /** Usernameless passkey login — drives the browser's own credential picker. */
   loginWithPasskey: () => Promise<LoginResult>;
+  /** Confirm forced MFA enrolment (mfa_setup_required) and finish the login it was blocking. */
+  confirmPolicyMfaSetup: (setupToken: string, code: string) => Promise<LoginResult & { backupCodes: string[] }>;
+  /** Set a new password after a login was blocked by password_expired, and finish that login. */
+  changeExpiredPassword: (changeToken: string, newPassword: string) => Promise<LoginResult>;
   logout: () => void;
 }
 
@@ -121,6 +125,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }, [loadCurrentUser]);
 
+  const confirmPolicyMfaSetup = useCallback(async (setupToken: string, code: string) => {
+    const result = await authApi.confirmPolicyMfaSetup(setupToken, code);
+    if (result.status === 'authenticated') {
+      tokenStore.set(result.accessToken);
+      await loadCurrentUser();
+    }
+    return result;
+  }, [loadCurrentUser]);
+
+  const changeExpiredPassword = useCallback(async (changeToken: string, newPassword: string) => {
+    const result = await authApi.changeExpiredPassword(changeToken, newPassword);
+    if (result.status === 'authenticated') {
+      tokenStore.set(result.accessToken);
+      await loadCurrentUser();
+    }
+    return result;
+  }, [loadCurrentUser]);
+
   const logout = useCallback(() => {
     // Best-effort — revoke the session server-side, but a slow/failed request
     // must never block the local sign-out.
@@ -137,8 +159,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo<AuthContextValue>(
-    () => ({ status, user, can, login, selectCompany, verifyMfa, loginWithMagicLink, loginWithOAuth, loginWithPasskey, logout }),
-    [status, user, can, login, selectCompany, verifyMfa, loginWithMagicLink, loginWithOAuth, loginWithPasskey, logout],
+    () => ({
+      status, user, can, login, selectCompany, verifyMfa, loginWithMagicLink, loginWithOAuth, loginWithPasskey,
+      confirmPolicyMfaSetup, changeExpiredPassword, logout,
+    }),
+    [
+      status, user, can, login, selectCompany, verifyMfa, loginWithMagicLink, loginWithOAuth, loginWithPasskey,
+      confirmPolicyMfaSetup, changeExpiredPassword, logout,
+    ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
