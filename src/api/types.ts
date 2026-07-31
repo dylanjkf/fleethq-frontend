@@ -660,4 +660,8 @@ export interface BillingStatus {
   billingConfigured: boolean;
   trialEndsAt: string | null;
   trialActive: boolean;
+  /** Auth/Billing Platform Phase 5/7: dunning-cycle state — see BillingPage's payment-failure banner. */
+  paymentFailureCount: number;
+  lastPaymentFailedAt: string | null;
+  nextPaymentAttemptAt: string | null;
 }

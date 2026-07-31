@@ -12,6 +12,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { PERMISSIONS } from '@/lib/permissions';
 import { useToast } from '@/hooks/use-toast';
 import { describeApiError } from '@/lib/errors';
+import { paymentFailureMessage } from './payment-failure-message';
 
 const STATUS_LABEL: Record<SubscriptionStatus, string> = {
   NONE: 'No active subscription',
@@ -122,10 +123,13 @@ export function BillingPage() {
       ) : (
         <div className="space-y-6">
           {data!.subscriptionStatus === 'PAST_DUE' && (
-            <div className="flex items-start gap-2 rounded-md border border-warning-500/40 bg-warning-500/10 p-4 text-sm text-warning-500">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
-              <span>Your last payment didn't go through. Update your payment method to avoid any interruption.</span>
-            </div>
+            <PaymentFailureBanner
+              paymentFailureCount={data!.paymentFailureCount}
+              nextPaymentAttemptAt={data!.nextPaymentAttemptAt}
+              showUpdateButton={canManage && data!.hasStripeCustomer}
+              redirecting={redirecting}
+              onUpdatePaymentMethod={goToPortal}
+            />
           )}
 
           {!data!.billingConfigured ? (
@@ -185,6 +189,34 @@ export function BillingPage() {
         </div>
       )}
     </Panel>
+  );
+}
+
+function PaymentFailureBanner({
+  paymentFailureCount,
+  nextPaymentAttemptAt,
+  showUpdateButton,
+  redirecting,
+  onUpdatePaymentMethod,
+}: {
+  paymentFailureCount: number;
+  nextPaymentAttemptAt: string | null;
+  showUpdateButton: boolean;
+  redirecting: boolean;
+  onUpdatePaymentMethod: () => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-3 rounded-md border border-warning-500/40 bg-warning-500/10 p-4 text-sm text-warning-500">
+      <div className="flex items-start gap-2">
+        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+        <span>{paymentFailureMessage(paymentFailureCount, nextPaymentAttemptAt)}</span>
+      </div>
+      {showUpdateButton && (
+        <Button variant="secondary" size="sm" onClick={onUpdatePaymentMethod} disabled={redirecting}>
+          <ExternalLink className="mr-2 h-4 w-4" /> Update payment method
+        </Button>
+      )}
+    </div>
   );
 }
 
