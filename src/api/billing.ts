@@ -12,6 +12,8 @@ export interface Entitlements {
   enforced: boolean;
   features: string[];
   limits: { maxOperators: number | null; maxAssets: number | null };
+  /** Auth/Billing Platform Phase 9: live counts, so the plan picker can show "8 of 10" instead of only the limit. */
+  usage: { operators: number; assets: number };
   trialEndsAt: string | null;
   trialActive: boolean;
   trialDaysLeft: number | null;

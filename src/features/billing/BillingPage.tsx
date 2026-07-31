@@ -13,6 +13,7 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { useToast } from '@/hooks/use-toast';
 import { describeApiError } from '@/lib/errors';
 import { paymentFailureMessage } from './payment-failure-message';
+import { getUsageWarnings, usageWarningMessage } from './usage-warning';
 
 const STATUS_LABEL: Record<SubscriptionStatus, string> = {
   NONE: 'No active subscription',
@@ -45,6 +46,10 @@ const FEATURE_LABEL: Record<string, string> = {
 
 function limitLabel(n: number | null): string {
   return n == null ? 'Unlimited' : String(n);
+}
+
+function resourceLabel(current: number | undefined, limit: number | null, name: string): string {
+  return current == null ? `${limitLabel(limit)} ${name}` : `${current} of ${limitLabel(limit)} ${name}`;
 }
 
 /**
@@ -164,18 +169,36 @@ export function BillingPage() {
               {/* Plan picker */}
               {plansData && plansData.plans.length > 0 && (
                 <div>
+                  {entitlements &&
+                    getUsageWarnings(entitlements.usage, entitlements.limits).map((warning) => (
+                      <div
+                        key={warning.resource}
+                        className={`mb-3 flex items-start gap-2 rounded-md border p-3 text-sm ${
+                          warning.atLimit ? 'border-warning-500/40 bg-warning-500/10 text-warning-500' : 'border-(--border-subtle) bg-(--surface-2) text-(--text-secondary)'
+                        }`}
+                      >
+                        <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                        <span>{usageWarningMessage(warning)}</span>
+                      </div>
+                    ))}
                   <p className="mb-3 text-sm font-medium text-(--text-secondary)">Choose a plan</p>
                   <div className="grid gap-4 md:grid-cols-3">
-                    {plansData.plans.map((plan) => (
-                      <PlanCard
-                        key={plan.key}
-                        plan={plan}
-                        isCurrent={data!.subscriptionStatus === 'ACTIVE' && data!.planPriceId === plan.priceId}
-                        canManage={canManage}
-                        redirecting={redirecting}
-                        onSubscribe={() => goToCheckout(plan.priceId)}
-                      />
-                    ))}
+                    {plansData.plans.map((plan) => {
+                      const isCurrent = data!.subscriptionStatus === 'ACTIVE' && data!.planPriceId === plan.priceId;
+                      const usage = isCurrent ? entitlements?.usage : undefined;
+                      return (
+                        <PlanCard
+                          key={plan.key}
+                          plan={plan}
+                          isCurrent={isCurrent}
+                          assetsLabel={resourceLabel(usage?.assets, plan.limits.maxAssets, 'assets')}
+                          operatorsLabel={resourceLabel(usage?.operators, plan.limits.maxOperators, 'operators')}
+                          canManage={canManage}
+                          redirecting={redirecting}
+                          onSubscribe={() => goToCheckout(plan.priceId)}
+                        />
+                      );
+                    })}
                   </div>
                   {!canManage && (
                     <p className="mt-3 text-sm text-(--text-tertiary)">
@@ -223,12 +246,17 @@ function PaymentFailureBanner({
 function PlanCard({
   plan,
   isCurrent,
+  assetsLabel,
+  operatorsLabel,
   canManage,
   redirecting,
   onSubscribe,
 }: {
   plan: PlanOption;
   isCurrent: boolean;
+  /** Auth/Billing Platform Phase 9: pre-formatted by the caller ("8 of 10 assets" for the company's own current plan, "10 assets" otherwise) so this component does no usage-vs-limit branching of its own. */
+  assetsLabel: string;
+  operatorsLabel: string;
   canManage: boolean;
   redirecting: boolean;
   onSubscribe: () => void;
@@ -240,7 +268,7 @@ function PlanCard({
         {isCurrent && <Badge variant="accent">Current</Badge>}
       </div>
       <p className="mt-1 text-sm text-(--text-tertiary)">
-        {limitLabel(plan.limits.maxAssets)} assets · {limitLabel(plan.limits.maxOperators)} operators
+        {assetsLabel} · {operatorsLabel}
       </p>
       <ul className="mt-3 flex-1 space-y-1.5 text-sm text-(--text-secondary)">
         {plan.features.map((f) => (
