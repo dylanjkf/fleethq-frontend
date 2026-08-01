@@ -1,7 +1,7 @@
 {
-  "name": "FleetOS FleetHQ",
+  "name": "FleetHQ",
   "short_name": "FleetHQ",
-  "description": "The FleetOS office console — dispatch, workshop, compliance, and fleet management.",
+  "description": "The FleetHQ office console — dispatch, workshop, compliance, and fleet management.",
   "id": "/",
   "start_url": "/",
   "scope": "/",

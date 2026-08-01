@@ -276,7 +276,7 @@ function CostTrendChart({ trend }: { trend: { date: string; cost: number }[] }) 
 
 function exportCsv(data: OperationsReport) {
   const lines = [
-    ['FleetOS operations report'],
+    ['FleetHQ operations report'],
     ['Period', data.range.from.slice(0, 10), 'to', data.range.to.slice(0, 10)],
     [],
     ['Deliveries total', String(data.deliveries.total)],

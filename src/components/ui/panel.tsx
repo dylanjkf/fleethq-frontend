@@ -10,7 +10,12 @@ export function PanelHeader({ className, ...props }: React.HTMLAttributes<HTMLDi
 }
 
 export function PanelTitle({ className, ...props }: React.HTMLAttributes<HTMLHeadingElement>) {
-  return <h2 className={cn('text-lg font-semibold text-(--text-primary)', className)} {...props} />;
+  return (
+    <h2
+      className={cn('text-xl font-semibold tracking-tight text-(--text-primary)', className)}
+      {...props}
+    />
+  );
 }
 
 export function PanelDescription({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) {

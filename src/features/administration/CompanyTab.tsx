@@ -99,7 +99,7 @@ export function CompanyTab() {
     <Card className="max-w-lg">
       <CardHeader className="flex-col items-start gap-1">
         <CardTitle>Company profile</CardTitle>
-        <CardDescription>Jurisdiction is fixed to AU for now — see the FleetOS Constitution.</CardDescription>
+        <CardDescription>Jurisdiction is fixed to AU for now — see the FleetHQ Constitution.</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>

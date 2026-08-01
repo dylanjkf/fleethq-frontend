@@ -76,7 +76,7 @@ export function AIPage() {
             </span>
           </PanelTitle>
           <PanelDescription>
-            Every signal FleetOS computes across your fleet, in one place — predictive maintenance, maintenance
+            Every signal FleetHQ computes across your fleet, in one place — predictive maintenance, maintenance
             priority, and driver-fatigue risk. This is where the system tells you what needs attention before it
             becomes a problem.
           </PanelDescription>

@@ -81,9 +81,9 @@ self.addEventListener('push', (event) => {
   try {
     payload = event.data.json();
   } catch {
-    payload = { title: 'FleetOS', body: event.data.text() };
+    payload = { title: 'FleetHQ', body: event.data.text() };
   }
-  const title = payload.title || 'FleetOS';
+  const title = payload.title || 'FleetHQ';
   event.waitUntil(
     self.registration.showNotification(title, {
       body: payload.body || '',

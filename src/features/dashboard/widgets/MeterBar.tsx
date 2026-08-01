@@ -8,16 +8,17 @@ const FILL: Record<MeterTone, string> = {
 };
 
 const DOT: Record<MeterTone, string> = {
-  success: 'text-success-500',
-  warning: 'text-warning-500',
-  danger: 'text-danger-500',
-  accent: 'text-accent-600',
+  success: 'bg-success-500',
+  warning: 'bg-warning-500',
+  danger: 'bg-danger-500',
+  accent: 'bg-accent-500',
 };
 
 /**
- * A labelled horizontal progress bar with a right-aligned percentage chip and
- * an optional sub-line — the "Compliance position" row shape from the design.
- * Shared by the compliance-position and fleet-utilisation widgets.
+ * A labelled horizontal progress bar with a right-aligned percentage and an
+ * optional sub-line — the "Compliance position" row shape from the design.
+ * Shared by the compliance-position and fleet-utilisation widgets. The fill
+ * eases in so a value change reads as motion, not a jump.
  */
 export function MeterBar({
   label,
@@ -35,15 +36,18 @@ export function MeterBar({
     <div>
       <div className="flex items-center justify-between gap-2">
         <span className="text-sm font-medium text-(--text-primary)">{label}</span>
-        <span className="flex items-center gap-1 text-xs tabular-nums text-(--text-secondary)">
-          <span className={DOT[tone]} aria-hidden>●</span>
+        <span className="flex items-center gap-1.5 text-xs font-medium tabular-nums text-(--text-secondary)">
+          <span className={`h-1.5 w-1.5 rounded-full ${DOT[tone]}`} aria-hidden />
           {clamped}%
         </span>
       </div>
-      <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-(--surface-2)">
-        <div className={`h-full rounded-full ${FILL[tone]}`} style={{ width: `${clamped}%` }} />
+      <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-(--surface-inset) ring-1 ring-inset ring-(--border-subtle)">
+        <div
+          className={`h-full rounded-full ${FILL[tone]} transition-[width] duration-500 [transition-timing-function:var(--ease-out-soft)]`}
+          style={{ width: `${clamped}%` }}
+        />
       </div>
-      {sublabel && <p className="mt-1 text-xs text-(--text-tertiary)">{sublabel}</p>}
+      {sublabel && <p className="mt-1.5 text-xs text-(--text-tertiary)">{sublabel}</p>}
     </div>
   );
 }

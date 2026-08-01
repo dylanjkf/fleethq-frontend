@@ -1,7 +1,7 @@
 import { useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Building2, Settings2, Truck, Users } from 'lucide-react';
-import { Panel, PanelDescription, PanelHeader, PanelTitle } from '@/components/ui/panel';
+import { Panel } from '@/components/ui/panel';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -87,17 +87,31 @@ export function DashboardPage() {
     fleet_utilisation: 'lg:col-span-2',
   };
 
+  const today = new Date().toLocaleDateString('en-AU', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  });
+
   return (
     <Panel>
-      <PanelHeader>
-        <div>
-          <PanelTitle>Good to see you, {user?.fullName.split(' ')[0]}</PanelTitle>
-          <PanelDescription>Here's what's happening at {user?.company.name} today.</PanelDescription>
+      <div className="industrial-grid overflow-hidden rounded-(--radius-panel) border border-(--border-subtle) bg-(--surface-0)/70 p-5 backdrop-blur-sm elevation-1 sm:p-6">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="eyebrow">{today}</p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-tight text-(--text-primary)">
+              Good to see you, {user?.fullName.split(' ')[0]}
+            </h1>
+            <p className="mt-1 text-sm text-(--text-secondary)">
+              Here's what's happening at {user?.company.name} today.
+            </p>
+          </div>
+          <Button variant="secondary" onClick={() => setCustomizing(true)} disabled={!layoutQuery.data}>
+            <Settings2 className="h-4 w-4" /> Customize
+          </Button>
         </div>
-        <Button variant="secondary" onClick={() => setCustomizing(true)} disabled={!layoutQuery.data}>
-          <Settings2 className="h-4 w-4" /> Customize
-        </Button>
-      </PanelHeader>
+      </div>
 
       {/* The layout query decides which widgets render, so a failure here would
           otherwise blank the whole dashboard — the first page every user lands

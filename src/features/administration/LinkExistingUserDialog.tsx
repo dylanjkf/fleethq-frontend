@@ -60,7 +60,7 @@ export function LinkExistingUserDialog({
                 <FormItem>
                   <FormLabel>Username</FormLabel>
                   <FormControl>
-                    <Input placeholder="Their existing FleetOS username" autoFocus {...field} />
+                    <Input placeholder="Their existing FleetHQ username" autoFocus {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

@@ -45,7 +45,7 @@ function parsePayload(text: string): AddressBookPayload {
     typeof (parsed as AddressBookPayload).name !== 'string' ||
     !Array.isArray((parsed as AddressBookPayload).entries)
   ) {
-    throw new Error('That file is not a FleetOS address book export.');
+    throw new Error('That file is not a FleetHQ address book export.');
   }
   return parsed as AddressBookPayload;
 }

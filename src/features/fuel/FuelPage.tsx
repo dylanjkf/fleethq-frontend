@@ -115,7 +115,7 @@ export function FuelPage() {
                 <TableCell className="text-right" data-tabular>{money(e.totalCost)}</TableCell>
                 <TableCell>
                   {/* Last 4 only — presented as masked so it reads as a card reference,
-                      not as though FleetOS holds the number. */}
+                      not as though FleetHQ holds the number. */}
                   <Badge variant="neutral">•••• {e.cardLast4}</Badge>
                 </TableCell>
                 <TableCell>

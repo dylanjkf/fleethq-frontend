@@ -17,7 +17,7 @@ interface ErrorStateProps {
 export function ErrorState({ title = 'Something went wrong', message, onRetry, className }: ErrorStateProps) {
   return (
     <div className={cn('flex flex-col items-center justify-center gap-3 py-16 text-center', className)}>
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-danger-500/15">
+      <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-danger-500/20 bg-danger-500/12">
         <AlertTriangle className="h-5 w-5 text-danger-500" />
       </div>
       <div className="space-y-1">

@@ -100,7 +100,7 @@ export function BillingPage() {
         <div>
           <PanelTitle>Billing &amp; subscription</PanelTitle>
           <PanelDescription>
-            Manage your FleetOS subscription. Payments are handled securely by Stripe — FleetOS never sees your card
+            Manage your FleetHQ subscription. Payments are handled securely by Stripe — FleetHQ never sees your card
             details.
           </PanelDescription>
         </div>
@@ -139,7 +139,7 @@ export function BillingPage() {
 
           {!data!.billingConfigured ? (
             <div className="rounded-lg border border-(--border-subtle) bg-(--surface-2) p-6 text-sm text-(--text-secondary)">
-              Online billing isn't set up on this deployment. Your account is managed directly — contact your FleetOS
+              Online billing isn't set up on this deployment. Your account is managed directly — contact your FleetHQ
               representative for any billing questions.
             </div>
           ) : (
@@ -150,12 +150,12 @@ export function BillingPage() {
                   <CreditCard className="mt-0.5 h-5 w-5 text-(--text-tertiary)" />
                   <div className="space-y-1 text-sm">
                     <p className="font-medium text-(--text-primary)">
-                      {data!.subscriptionStatus !== 'NONE' ? 'You have a FleetOS subscription' : entitlements?.trialActive ? 'On free trial' : 'No active subscription'}
+                      {data!.subscriptionStatus !== 'NONE' ? 'You have a FleetHQ subscription' : entitlements?.trialActive ? 'On free trial' : 'No active subscription'}
                     </p>
                     <p className="text-(--text-secondary)">
                       {data!.subscriptionStatus !== 'NONE'
                         ? 'Manage your plan, payment method, and invoices in the Stripe billing portal.'
-                        : 'Pick a plan below to keep your fleet running on FleetOS.'}
+                        : 'Pick a plan below to keep your fleet running on FleetHQ.'}
                     </p>
                   </div>
                 </div>
