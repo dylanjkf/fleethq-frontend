@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { createOrganisationUser, listOrganisationRoles } from '@/api/organisations';
 import { Button } from '@/components/ui/Button';
 import { Input, Select } from '@/components/ui/Input';
 import { ErrorState } from '@/components/ui/EmptyState';
 import { ApiClientError } from '@/api/client';
+import { useModalDialog } from '@/hooks/useModalDialog';
 
 interface CreateUserDialogProps {
   companyId: string;
@@ -19,6 +20,8 @@ export function CreateUserDialog({ companyId, onClose, onCreated }: CreateUserDi
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [roleId, setRoleId] = useState('');
+  const titleId = useId();
+  const dialogRef = useModalDialog<HTMLDivElement>(onClose);
 
   const mutation = useMutation({
     mutationFn: () => createOrganisationUser(companyId, { username, fullName, email: email || undefined, roleId }),
@@ -30,8 +33,16 @@ export function CreateUserDialog({ companyId, onClose, onCreated }: CreateUserDi
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
-      <div className="w-full max-w-sm rounded-(--radius-panel) border border-(--border-subtle) bg-(--surface-1) p-5" onClick={(e) => e.stopPropagation()}>
-        <h2 className="text-base font-semibold">Add a user to this organisation</h2>
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+        className="w-full max-w-sm rounded-(--radius-panel) border border-(--border-subtle) bg-(--surface-1) p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id={titleId} className="text-base font-semibold">Add a user to this organisation</h2>
         <p className="mt-1 text-sm text-(--text-secondary)">Leaving no password sends them an email invite to set their own.</p>
         <div className="mt-4 space-y-3">
           <Input placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} />

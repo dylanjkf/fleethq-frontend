@@ -101,7 +101,7 @@ export function ScheduleTemplateDialog({ open, onOpenChange, template, onSubmit,
                   <span className="text-xs text-(--text-tertiary)">days</span>
                 </div>
                 {items.length > 1 && (
-                  <button type="button" className="text-(--text-tertiary) hover:text-(--text-primary)" onClick={() => setItems((arr) => arr.filter((_, j) => j !== i))}>
+                  <button type="button" aria-label="Remove schedule item" className="text-(--text-tertiary) hover:text-(--text-primary)" onClick={() => setItems((arr) => arr.filter((_, j) => j !== i))}>
                     <X className="h-4 w-4" />
                   </button>
                 )}

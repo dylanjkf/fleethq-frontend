@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "npm install && npm run build && npm --prefix admin install && npm --prefix admin run build && rm -rf dist/admin && mv admin/dist dist/admin",
+  "buildCommand": "npm ci && npm run build && npm --prefix admin ci && npm --prefix admin run build && rm -rf dist/admin && mv admin/dist dist/admin",
   "outputDirectory": "dist",
   "framework": null,
   "rewrites": [

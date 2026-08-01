@@ -158,6 +158,7 @@ export function AttachedUnitsTab() {
         <div className="relative w-72">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-(--text-tertiary)" />
           <Input
+            aria-label="Filter by name or reference"
             placeholder="Filter by name or reference…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

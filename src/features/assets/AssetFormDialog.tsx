@@ -250,7 +250,7 @@ export function AssetFormDialog({ open, onOpenChange, asset, onSubmit, isSubmitt
                     value={f.value}
                     onChange={(e) => setCustomFields((prev) => prev.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))}
                   />
-                  <Button type="button" variant="ghost" size="icon" onClick={() => setCustomFields((prev) => prev.filter((_, j) => j !== i))}>
+                  <Button type="button" variant="ghost" size="icon" aria-label="Remove custom field" onClick={() => setCustomFields((prev) => prev.filter((_, j) => j !== i))}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>

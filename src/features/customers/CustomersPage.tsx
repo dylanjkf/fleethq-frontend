@@ -116,7 +116,7 @@ export function CustomersPage() {
       <div className="mb-4">
         <div className="relative w-72">
           <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-(--text-tertiary)" />
-          <Input placeholder="Search name, address, contact…" value={list.searchInput} onChange={(e) => list.setSearchInput(e.target.value)} className="pl-8" />
+          <Input aria-label="Search name, address, contact" placeholder="Search name, address, contact…" value={list.searchInput} onChange={(e) => list.setSearchInput(e.target.value)} className="pl-8" />
         </div>
       </div>
 

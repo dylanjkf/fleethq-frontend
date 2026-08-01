@@ -155,6 +155,11 @@ export function AssignJobDialog({ open, onOpenChange, job, onSubmit, isSubmittin
                 ))}
               </SelectContent>
             </Select>
+            {assetsQuery.isError && (
+              <p className="flex items-center gap-1.5 text-xs text-danger-500">
+                <AlertTriangle className="h-3.5 w-3.5" /> Couldn't load assets — try again.
+              </p>
+            )}
             {assetId !== UNASSIGNED_VALUE && assetId === topRecommendedAssetId && (
               <p className="flex items-center gap-1.5 text-xs text-accent-500">
                 <Sparkles className="h-3.5 w-3.5" /> Suggested — best available match for this job.
@@ -187,6 +192,11 @@ export function AssignJobDialog({ open, onOpenChange, job, onSubmit, isSubmittin
                 ))}
               </SelectContent>
             </Select>
+            {operatorsQuery.isError && (
+              <p className="flex items-center gap-1.5 text-xs text-danger-500">
+                <AlertTriangle className="h-3.5 w-3.5" /> Couldn't load operators — try again.
+              </p>
+            )}
             {hasFatigueRisk && fatigueStatus && (
               <div className="space-y-2 rounded-md border border-warning-500/40 bg-warning-500/10 p-3">
                 <p className="flex items-center gap-1.5 text-xs font-medium text-warning-500">
@@ -221,6 +231,11 @@ export function AssignJobDialog({ open, onOpenChange, job, onSubmit, isSubmittin
                 ))}
               </SelectContent>
             </Select>
+            {depotsQuery.isError && (
+              <p className="flex items-center gap-1.5 text-xs text-danger-500">
+                <AlertTriangle className="h-3.5 w-3.5" /> Couldn't load depots — try again.
+              </p>
+            )}
           </div>
 
           <DialogFooter>

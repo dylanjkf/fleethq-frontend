@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router';
 import { BookUser, Map as MapIcon, Search, ShieldCheck, Truck, Users, Warehouse, Wrench, type LucideIcon } from 'lucide-react';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { NAV_ITEMS } from '@/app/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
@@ -88,10 +88,12 @@ export function CommandPalette() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent className="top-32 max-w-md translate-y-0 p-0">
+        <DialogTitle className="sr-only">Command palette</DialogTitle>
         <div className="flex items-center gap-2 border-b border-(--border-subtle) px-3">
           <Search className="h-4 w-4 text-(--text-tertiary)" />
           <Input
             autoFocus
+            aria-label="Search pages, assets, operators, jobs"
             placeholder="Search pages, assets, operators, jobs…"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
