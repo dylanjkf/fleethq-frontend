@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
@@ -210,6 +211,7 @@ export function FormRunnerDialog({ template, onOpenChange }: FormRunnerDialogPro
                   </SelectContent>
                 </Select>
               )}
+              {field.type === 'asset_ref' && <PickerError query={assetsQuery} noun="assets" />}
 
               {field.type === 'operator_ref' && (
                 <Select value={(answers[field.id] as string) ?? ''} onValueChange={(v) => setValue(field.id, v)} disabled={operatorsQuery.isLoading}>
@@ -225,6 +227,7 @@ export function FormRunnerDialog({ template, onOpenChange }: FormRunnerDialogPro
                   </SelectContent>
                 </Select>
               )}
+              {field.type === 'operator_ref' && <PickerError query={operatorsQuery} noun="operators" />}
             </div>
           ))}
         </div>

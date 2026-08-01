@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const NO_DEPOT_VALUE = '__no_depot__';
@@ -131,6 +132,7 @@ export function JobFormDialog({ open, onOpenChange, onSubmit, isSubmitting }: Jo
                   ))}
                 </SelectContent>
               </Select>
+              <PickerError query={depotsQuery} noun="depots" />
             </div>
             <DialogFooter>
               <Button type="button" variant="secondary" onClick={() => onOpenChange(false)}>

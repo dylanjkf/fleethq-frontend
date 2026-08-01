@@ -5,6 +5,7 @@ import type { AttachedUnit } from '@/api/types';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface HitchDialogProps {
@@ -58,6 +59,7 @@ export function HitchDialog({ open, onOpenChange, attachedUnit, onSubmit, isSubm
                 ))}
               </SelectContent>
             </Select>
+            <PickerError query={assetsQuery} noun="assets" />
           </div>
 
           <DialogFooter>

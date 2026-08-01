@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const itemSchema = z.object({
@@ -138,6 +139,7 @@ export function ChecklistTemplateFormDialog({
                       ))}
                     </SelectContent>
                   </Select>
+                  <PickerError query={categoriesQuery} noun="categories" />
                   <FormMessage />
                 </FormItem>
               )}
@@ -152,6 +154,10 @@ export function ChecklistTemplateFormDialog({
               <div className="max-h-40 space-y-1 overflow-y-auto rounded-lg border border-(--border-subtle) p-2">
                 {assetsQuery.isLoading ? (
                   <p className="p-1 text-sm text-(--text-tertiary)">Loading assets…</p>
+                ) : assetsQuery.isError ? (
+                  <div className="p-1">
+                    <PickerError query={assetsQuery} noun="assets" />
+                  </div>
                 ) : assets.length === 0 ? (
                   <p className="p-1 text-sm text-(--text-tertiary)">No assets yet.</p>
                 ) : (

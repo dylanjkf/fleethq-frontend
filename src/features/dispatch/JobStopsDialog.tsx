@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AttachmentImage } from '@/components/ui/attachment-image';
 import { BarcodeScanInput } from '@/features/dispatch/BarcodeScanInput';
@@ -323,6 +324,7 @@ export function JobStopsDialog({ jobId, onOpenChange }: JobStopsDialogProps) {
                     ))}
                   </SelectContent>
                 </Select>
+                <PickerError query={customersQuery} noun="customers" />
                 <Input
                   placeholder={customerId === FREE_TEXT ? 'Stop label (e.g. 12 Smith St — ACME)' : 'Label (defaults from customer)'}
                   value={label}

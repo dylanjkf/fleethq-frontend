@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 function toDateInputValue(iso?: string | null): string {
@@ -154,6 +155,7 @@ export function ComplianceDocumentFormDialog({ open, onOpenChange, document, onS
                     ))}
                   </SelectContent>
                 </Select>
+                <PickerError query={assetsQuery} noun="assets" />
               </div>
             ) : (
               <div className="space-y-1.5">
@@ -170,6 +172,7 @@ export function ComplianceDocumentFormDialog({ open, onOpenChange, document, onS
                     ))}
                   </SelectContent>
                 </Select>
+                <PickerError query={operatorsQuery} noun="operators" />
               </div>
             )}
 

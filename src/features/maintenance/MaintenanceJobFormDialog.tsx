@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const schema = z.object({
@@ -81,6 +82,7 @@ export function MaintenanceJobFormDialog({
                       ))}
                     </SelectContent>
                   </Select>
+                  <PickerError query={assetsQuery} noun="assets" />
                   <FormMessage />
                 </FormItem>
               )}
