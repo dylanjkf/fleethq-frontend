@@ -36,6 +36,14 @@ function isApiRequest(url) {
   return url.pathname.startsWith('/v1') || url.pathname.startsWith('/health');
 }
 
+// The admin app is a separate SPA served from the same origin under /admin.
+// This (office) worker must never touch those requests — otherwise its
+// navigation fallback would serve the office app's HTML shell for an /admin/*
+// route, booting the wrong app offline. Let the browser/network handle them.
+function isAdminRequest(url) {
+  return url.pathname === '/admin' || url.pathname.startsWith('/admin/');
+}
+
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
@@ -43,6 +51,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   if (url.origin !== self.location.origin) return;
   if (isApiRequest(url)) return;
+  if (isAdminRequest(url)) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(
@@ -72,9 +81,9 @@ self.addEventListener('push', (event) => {
   try {
     payload = event.data.json();
   } catch {
-    payload = { title: 'FleetOS', body: event.data.text() };
+    payload = { title: 'FleetHQ', body: event.data.text() };
   }
-  const title = payload.title || 'FleetOS';
+  const title = payload.title || 'FleetHQ';
   event.waitUntil(
     self.registration.showNotification(title, {
       body: payload.body || '',

@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router';
 import { LogOut, Monitor, Moon, Search, Settings, Sun, User as UserIcon } from 'lucide-react';
 import { Avatar, AvatarFallback, initialsFrom } from '@/components/ui/avatar';
 import { NotificationsBell } from '@/components/layout/NotificationsBell';
+import { MobileNav } from '@/components/layout/MobileNav';
+import { Breadcrumbs } from '@/components/layout/Breadcrumbs';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -26,19 +28,37 @@ export function Topbar() {
   const ThemeIcon = theme === 'dark' ? Moon : theme === 'light' ? Sun : Monitor;
 
   return (
-    <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-4 border-b border-(--border-subtle) bg-(--surface-0)/70 px-4 backdrop-blur-xl">
-      <button
-        type="button"
-        onClick={() => setCommandPaletteOpen(true)}
-        className="flex w-64 items-center gap-2 rounded-lg border border-(--border-subtle) px-3 py-1.5 text-sm text-(--text-tertiary) transition-colors hover:border-accent-500/40 hover:bg-(--surface-2)"
-      >
-        <Search className="h-3.5 w-3.5" />
-        Search…
-        <kbd className="ml-auto rounded border border-(--border-subtle) px-1 text-[10px]">⌘K</kbd>
-      </button>
+    <header className="sticky top-0 z-30 flex h-14 items-center justify-between gap-3 border-b border-(--border-subtle) bg-(--surface-0)/70 px-3 backdrop-blur-xl sm:px-4">
+      <div className="flex min-w-0 items-center gap-2">
+        <MobileNav />
+        <Breadcrumbs />
+      </div>
 
-      <div className="flex items-center gap-2">
-        <span className="hidden text-sm text-(--text-tertiary) sm:inline">{user.company.name}</span>
+      <div className="flex items-center gap-1.5 sm:gap-2">
+        {/* Command palette trigger — full control on desktop, an icon on mobile. */}
+        <button
+          type="button"
+          onClick={() => setCommandPaletteOpen(true)}
+          className="hidden items-center gap-2 rounded-md border border-(--border-subtle) bg-(--surface-inset) px-3 py-1.5 text-sm text-(--text-tertiary) transition-colors hover:border-accent-500/40 hover:bg-(--surface-2) lg:flex lg:w-60"
+          aria-label="Open search"
+        >
+          <Search className="h-3.5 w-3.5" />
+          <span className="flex-1 text-left">Search…</span>
+          <kbd className="rounded border border-(--border-subtle) px-1 text-[10px] font-medium">⌘K</kbd>
+        </button>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="lg:hidden"
+          aria-label="Open search"
+          onClick={() => setCommandPaletteOpen(true)}
+        >
+          <Search className="h-4 w-4" />
+        </Button>
+
+        <span className="hidden max-w-[12rem] truncate border-l border-(--border-subtle) pl-3 text-sm text-(--text-secondary) xl:inline">
+          {user.company.name}
+        </span>
 
         <NotificationsBell />
 
@@ -63,7 +83,10 @@ export function Topbar() {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button type="button" className="rounded-full">
+            <button
+              type="button"
+              className="rounded-full ring-offset-2 ring-offset-(--surface-0) transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
+            >
               <Avatar>
                 <AvatarFallback>{initialsFrom(user.fullName)}</AvatarFallback>
               </Avatar>

@@ -1,0 +1,32 @@
+# Dependabot: keep dependencies patched, with a bias toward security updates.
+# Minimal config per the production-readiness audit (no Dependabot/Renovate
+# existed in any repo). Covers both the office app (root) and the separate
+# admin app, weekly, with minor/patch bumps grouped into one PR per app.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      npm-minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: npm
+    directory: /admin
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    groups:
+      npm-minor-and-patch:
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

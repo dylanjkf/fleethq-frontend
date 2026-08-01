@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
@@ -104,6 +105,7 @@ export function WebhookFormDialog({ open, onOpenChange, webhook, isSubmitting, o
                   ))}
                 </SelectContent>
               </Select>
+              <PickerError query={connectionsQuery} noun="connections" />
               {direction === 'INCOMING' && <p className="text-xs text-(--text-tertiary)">If linked, an incoming payload is mapped and synced into that connection's target entity.</p>}
             </div>
           )}
@@ -123,6 +125,7 @@ export function WebhookFormDialog({ open, onOpenChange, webhook, isSubmitting, o
                 ))}
               </SelectContent>
             </Select>
+            <PickerError query={credentialsQuery} noun="credentials" />
             <p className="text-xs text-(--text-tertiary)">
               {direction === 'INCOMING' ? 'Verifies the X-FleetHQ-Signature header on every delivery.' : 'Signs outgoing deliveries with X-FleetHQ-Signature (HMAC-SHA256).'}
             </p>

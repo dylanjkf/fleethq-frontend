@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 
@@ -175,6 +176,7 @@ export function ConnectionFormDialog({ open, onOpenChange, connection, isSubmitt
                 ))}
               </SelectContent>
             </Select>
+            <PickerError query={credentialsQuery} noun="credentials" />
           </div>
 
           <div className="space-y-1.5">

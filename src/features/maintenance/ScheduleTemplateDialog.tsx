@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Props {
@@ -71,6 +72,7 @@ export function ScheduleTemplateDialog({ open, onOpenChange, template, onSubmit,
               </Select>
             </div>
           )}
+          {!isEdit && <PickerError query={presetsQuery} noun="presets" />}
           <div className="space-y-1.5">
             <Label htmlFor="tmpl-name">Name</Label>
             <Input id="tmpl-name" placeholder="e.g. Heavy vehicle schedule" value={name} onChange={(e) => setName(e.target.value)} />
@@ -101,7 +103,7 @@ export function ScheduleTemplateDialog({ open, onOpenChange, template, onSubmit,
                   <span className="text-xs text-(--text-tertiary)">days</span>
                 </div>
                 {items.length > 1 && (
-                  <button type="button" className="text-(--text-tertiary) hover:text-(--text-primary)" onClick={() => setItems((arr) => arr.filter((_, j) => j !== i))}>
+                  <button type="button" aria-label="Remove schedule item" className="text-(--text-tertiary) hover:text-(--text-primary)" onClick={() => setItems((arr) => arr.filter((_, j) => j !== i))}>
                     <X className="h-4 w-4" />
                   </button>
                 )}

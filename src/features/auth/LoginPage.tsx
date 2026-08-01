@@ -241,7 +241,7 @@ export function LoginPage() {
             ? 'Choose a company'
             : mode === 'magic-link' || mode === 'magic-link-sent'
               ? 'Email me a sign-in link'
-              : 'Sign in to FleetOS';
+              : 'Sign in to FleetHQ';
   const description = mfaSetupBackupCodes
     ? "Each can be used once if you lose your authenticator. They won't be shown again."
     : mfaSetup
@@ -257,13 +257,66 @@ export function LoginPage() {
               : 'Enter your company-issued username and password.';
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-(--surface-1) p-4">
-      <Card className="w-full max-w-sm">
-        <CardHeader className="flex-col items-start gap-1">
-          <CardTitle className="text-lg">{title}</CardTitle>
-          <CardDescription>{description}</CardDescription>
-        </CardHeader>
-        <CardContent>
+    <div className="flex min-h-screen">
+      {/* Brand panel — an industrial "control room" first impression. Hidden on
+          small screens, where the compact mark above the card carries it. */}
+      <aside
+        className="industrial-grid relative hidden w-1/2 flex-col justify-between overflow-hidden p-10 text-white lg:flex xl:w-[55%]"
+        style={{
+          background:
+            'linear-gradient(135deg, oklch(0.27 0.11 262) 0%, oklch(0.2 0.04 264) 55%, oklch(0.15 0.02 264) 100%)',
+        }}
+      >
+        <div className="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-accent-500/20 blur-3xl" />
+        <div className="relative flex items-center gap-2.5">
+          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-accent-400 to-accent2-500 text-sm font-bold shadow-lg">
+            F
+          </span>
+          <div className="flex flex-col leading-none">
+            <span className="text-sm font-semibold tracking-tight">FleetHQ</span>
+            <span className="text-[0.6875rem] font-semibold uppercase tracking-[0.09em] text-white/50">
+              Fleet Operations
+            </span>
+          </div>
+        </div>
+
+        <div className="relative max-w-md">
+          <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-accent-200/80">
+            Australian-built fleet management
+          </p>
+          <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight">
+            The operating system for commercial fleets.
+          </h1>
+          <p className="mt-4 text-sm leading-relaxed text-white/60">
+            Drivers, dispatch, workshop and compliance — one connected platform for
+            transport, logistics, mining and construction operators.
+          </p>
+        </div>
+
+        <div className="relative flex items-center gap-6 text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-white/40">
+          <span>Precision</span>
+          <span className="h-1 w-1 rounded-full bg-white/30" />
+          <span>Reliability</span>
+          <span className="h-1 w-1 rounded-full bg-white/30" />
+          <span>Compliance</span>
+        </div>
+      </aside>
+
+      {/* Auth panel. */}
+      <div className="flex flex-1 items-center justify-center bg-(--surface-1) p-6">
+        <div className="w-full max-w-sm">
+          <div className="mb-6 flex items-center gap-2.5 lg:hidden">
+            <span className="flex h-8 w-8 items-center justify-center rounded-md bg-gradient-to-br from-accent-400 to-accent2-500 text-sm font-bold text-white shadow-sm">
+              F
+            </span>
+            <span className="text-base font-semibold tracking-tight text-(--text-primary)">FleetHQ</span>
+          </div>
+          <Card className="w-full">
+            <CardHeader className="flex-col items-start gap-1">
+              <CardTitle className="text-lg">{title}</CardTitle>
+              <CardDescription>{description}</CardDescription>
+            </CardHeader>
+            <CardContent>
           {mfaSetupBackupCodes ? (
             <div key="backup-codes" className="space-y-2">
               <ul className="grid grid-cols-2 gap-1 rounded bg-(--surface-2) p-2 font-mono text-(--text-primary)">
@@ -483,8 +536,10 @@ export function LoginPage() {
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 }

@@ -43,7 +43,7 @@ export function ImpactPage() {
             </span>
           </PanelTitle>
           <PanelDescription>
-            The value FleetOS has delivered for your business — deliveries proven, on-time service, safety compliance, and
+            The value FleetHQ has delivered for your business — deliveries proven, on-time service, safety compliance, and
             maintenance under control.
           </PanelDescription>
         </div>
@@ -69,13 +69,13 @@ export function ImpactPage() {
         <EmptyState
           icon={TrendingUp}
           title="Not enough activity yet"
-          description="Once deliveries, checklists and maintenance start flowing through FleetOS, this page charts the value it's delivering."
+          description="Once deliveries, checklists and maintenance start flowing through FleetHQ, this page charts the value it's delivering."
         />
       ) : (
         <div className="space-y-8">
           {data.firstActivityAt && (
             <p className="text-sm text-(--text-tertiary)">
-              Running on FleetOS since{' '}
+              Running on FleetHQ since{' '}
               <span className="font-medium text-(--text-secondary)">
                 {new Date(data.firstActivityAt).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })}
               </span>
@@ -271,7 +271,7 @@ function rateTone(pctValue: number | null): 'accent' | 'ok' | 'warn' | 'bad' {
 
 function exportCsv(data: ImpactReport) {
   const lines = [
-    ['FleetOS impact report'],
+    ['FleetHQ impact report'],
     ['Period', data.range.from.slice(0, 10), 'to', data.range.to.slice(0, 10)],
     ['Running since', data.firstActivityAt ? data.firstActivityAt.slice(0, 10) : ''],
     [],

@@ -3,6 +3,7 @@ import { Outlet } from 'react-router';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { CommandPalette } from '@/components/layout/CommandPalette';
+import { useRecentPages } from '@/hooks/useRecentPages';
 
 /** Shown briefly while a code-split route chunk loads. */
 function RouteFallback() {
@@ -18,15 +19,21 @@ function RouteFallback() {
  * route + a nav entry (see app/navigation.ts) — this file never changes.
  */
 export function AppShell() {
+  // Side effect only: record top-level page visits for the command palette's
+  // "recently viewed" list.
+  useRecentPages();
+
   return (
     <div className="app-surface flex h-screen">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
-        <main className="flex-1 overflow-y-auto p-6">
-          <Suspense fallback={<RouteFallback />}>
-            <Outlet />
-          </Suspense>
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+          <div className="mx-auto w-full max-w-[100rem] animate-fade-in">
+            <Suspense fallback={<RouteFallback />}>
+              <Outlet />
+            </Suspense>
+          </div>
         </main>
       </div>
       <CommandPalette />

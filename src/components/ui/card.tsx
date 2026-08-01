@@ -1,11 +1,19 @@
 import { type HTMLAttributes } from 'react';
 import { cn } from '@/lib/cn';
 
+/**
+ * The primary bordered container. Industrial-crisp: a hairline border does the
+ * structural work, elevation stays subtle. Pass `data-interactive` (or an
+ * `onClick`) and it lifts on hover for card-grid navigation.
+ */
 export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
+  const interactive = props.onClick != null;
   return (
     <div
       className={cn(
-        'rounded-(--radius-panel) border border-(--border-subtle) bg-(--surface-0)/80 backdrop-blur-sm elevation-1',
+        'rounded-(--radius-panel) border border-(--border-subtle) bg-(--surface-0)/85 backdrop-blur-sm elevation-1',
+        interactive &&
+          'cursor-pointer transition-all duration-200 [transition-timing-function:var(--ease-out-soft)] hover:-translate-y-px hover:border-accent-500/40 hover:elevation-2',
         className,
       )}
       {...props}
@@ -14,11 +22,21 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 }
 
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn('flex items-center justify-between gap-2 p-4 pb-2', className)} {...props} />;
+  return (
+    <div
+      className={cn('flex items-center justify-between gap-2 p-4 pb-2', className)}
+      {...props}
+    />
+  );
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn('text-sm font-medium text-(--text-primary)', className)} {...props} />;
+  return (
+    <h3
+      className={cn('text-sm font-semibold text-(--text-primary)', className)}
+      {...props}
+    />
+  );
 }
 
 export function CardDescription({ className, ...props }: HTMLAttributes<HTMLParagraphElement>) {

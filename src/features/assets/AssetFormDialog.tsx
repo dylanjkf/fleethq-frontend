@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PickerError } from '@/components/ui/picker-error';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AUSTRALIAN_VEHICLE_MAKES, modelsForMake, vehicleYearOptions } from '@/features/assets/australian-vehicles';
 import type { Asset } from '@/api/types';
@@ -154,6 +155,7 @@ export function AssetFormDialog({ open, onOpenChange, asset, onSubmit, isSubmitt
                   ))}
                 </SelectContent>
               </Select>
+              <PickerError query={categoriesQuery} noun="categories" />
               <p className="text-xs text-(--text-tertiary)">Manage categories under Fleet → Categories.</p>
             </div>
 
@@ -250,7 +252,7 @@ export function AssetFormDialog({ open, onOpenChange, asset, onSubmit, isSubmitt
                     value={f.value}
                     onChange={(e) => setCustomFields((prev) => prev.map((x, j) => (j === i ? { ...x, value: e.target.value } : x)))}
                   />
-                  <Button type="button" variant="ghost" size="icon" onClick={() => setCustomFields((prev) => prev.filter((_, j) => j !== i))}>
+                  <Button type="button" variant="ghost" size="icon" aria-label="Remove custom field" onClick={() => setCustomFields((prev) => prev.filter((_, j) => j !== i))}>
                     <X className="h-4 w-4" />
                   </Button>
                 </div>

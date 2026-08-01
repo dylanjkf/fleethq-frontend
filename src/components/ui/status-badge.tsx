@@ -6,7 +6,7 @@ import type { ComplianceExpiryStatus, JobStatus, MaintenanceJobStatus } from '@/
  * (Assets, Operators, Users, Roles) shares this instead of a bespoke label.
  */
 export function ArchivedStatusBadge({ archivedAt }: { archivedAt: string | null }) {
-  return archivedAt ? <Badge variant="neutral">Archived</Badge> : <Badge variant="success">Active</Badge>;
+  return archivedAt ? <Badge variant="neutral" dot>Archived</Badge> : <Badge variant="success" dot>Active</Badge>;
 }
 
 const JOB_STATUS_LABEL: Record<JobStatus, string> = {
@@ -24,7 +24,7 @@ const JOB_STATUS_VARIANT: Record<JobStatus, 'neutral' | 'accent' | 'success' | '
 };
 
 export function JobStatusBadge({ status }: { status: JobStatus }) {
-  return <Badge variant={JOB_STATUS_VARIANT[status]}>{JOB_STATUS_LABEL[status]}</Badge>;
+  return <Badge variant={JOB_STATUS_VARIANT[status]} dot>{JOB_STATUS_LABEL[status]}</Badge>;
 }
 
 const MAINTENANCE_STATUS_LABEL: Record<MaintenanceJobStatus, string> = {
@@ -42,7 +42,7 @@ const MAINTENANCE_STATUS_VARIANT: Record<MaintenanceJobStatus, 'neutral' | 'acce
 };
 
 export function MaintenanceStatusBadge({ status }: { status: MaintenanceJobStatus }) {
-  return <Badge variant={MAINTENANCE_STATUS_VARIANT[status]}>{MAINTENANCE_STATUS_LABEL[status]}</Badge>;
+  return <Badge variant={MAINTENANCE_STATUS_VARIANT[status]} dot>{MAINTENANCE_STATUS_LABEL[status]}</Badge>;
 }
 
 const COMPLIANCE_EXPIRY_LABEL: Record<ComplianceExpiryStatus, string> = {
@@ -59,7 +59,7 @@ const COMPLIANCE_EXPIRY_VARIANT: Record<ComplianceExpiryStatus, 'success' | 'war
 
 /** `expiryStatus` is derived by the API from `expiresAt` at read time — never stored. */
 export function ComplianceExpiryStatusBadge({ status }: { status: ComplianceExpiryStatus }) {
-  return <Badge variant={COMPLIANCE_EXPIRY_VARIANT[status]}>{COMPLIANCE_EXPIRY_LABEL[status]}</Badge>;
+  return <Badge variant={COMPLIANCE_EXPIRY_VARIANT[status]} dot>{COMPLIANCE_EXPIRY_LABEL[status]}</Badge>;
 }
 
 type AuditOutcome = 'success' | 'failure';
@@ -77,5 +77,5 @@ const AUDIT_OUTCOME_VARIANT: Record<AuditOutcome, 'neutral' | 'danger'> = {
 };
 
 export function AuditOutcomeBadge({ outcome }: { outcome: AuditOutcome }) {
-  return <Badge variant={AUDIT_OUTCOME_VARIANT[outcome]}>{AUDIT_OUTCOME_LABEL[outcome]}</Badge>;
+  return <Badge variant={AUDIT_OUTCOME_VARIANT[outcome]} dot>{AUDIT_OUTCOME_LABEL[outcome]}</Badge>;
 }

@@ -164,7 +164,7 @@ export function GpsSetupGuide({ onCopy }: { onCopy: (text: string) => void }) {
           <div className="rounded-lg border border-(--border-subtle) bg-(--surface-2) p-3">
             <p className="font-medium">Will my tracker work?</p>
             <p className="mt-1 text-(--text-tertiary)">
-              FleetOS accepts an open HTTP JSON POST, which any of these can do:
+              FleetHQ accepts an open HTTP JSON POST, which any of these can do:
             </p>
             <ul className="mt-2 list-inside list-disc space-y-1 text-(--text-tertiary)">
               <li>A tracker with configurable <span className="font-medium">HTTP/HTTPS reporting</span> (many modern 4G units).</li>

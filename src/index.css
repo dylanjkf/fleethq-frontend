@@ -1,13 +1,20 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens for FleetHQ. The reference point is still restraint —
- * Linear/Stripe/Notion: few colors, generous whitespace, subtle borders over
- * heavy shadows — but the 2026 refresh gives it a quiet "working in the
- * future" feel: cool-tinted surfaces (a hint of blue rather than flat grey),
- * a paired accent for the odd subtle gradient/glow, soft elevation tokens,
- * and one shared motion curve. Light and dark are both first-class
- * (13-UI-UX/Design_System.md: "status is always visible, never buried").
+ * ─── FleetHQ Design System — "Industrial Enterprise" (v2) ────────────────────
+ *
+ * v1 chased Linear/Stripe restraint. v2 keeps that discipline (few colours,
+ * generous whitespace, borders over heavy shadows) but gives FleetHQ a
+ * purpose-built identity for Australian transport, logistics, mining and
+ * construction operators: precise, engineered geometry; control-room dark
+ * surfaces with real contrast; hairline structure instead of decoration;
+ * uppercase machine-labels for section headers; tabular figures everywhere a
+ * number lives. The indigo brand mark is unchanged — it stays the single flash
+ * of accent against an otherwise industrial, instrument-panel palette.
+ *
+ * Source of truth: FleetOS-Playbook/13-UI-UX/Design_System.md
+ * ("status is always visible, never buried"; "one visual language, two form
+ * factors"; the token layer is what white-label theming will later extend).
  */
 @theme {
   --font-sans:
@@ -15,26 +22,47 @@
   --font-mono:
     'JetBrains Mono', ui-monospace, 'SF Mono', 'Menlo', monospace;
 
-  /* Primary accent — an electric indigo. */
+  /* Crisper, engineered geometry — corners read as machined, not rounded-off.
+     Overriding Tailwind's radius scale re-tunes every rounded-* utility at once. */
+  --radius-xs: 0.1875rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.625rem;
+  --radius-2xl: 0.75rem;
+  --radius-panel: 0.625rem;
+
+  /* Primary accent — an electric indigo (brand, unchanged). Wider ramp so
+     surfaces, rails, and text-on-accent all pull from one hue. */
   --color-accent-50: oklch(0.97 0.02 262);
   --color-accent-100: oklch(0.93 0.045 262);
   --color-accent-200: oklch(0.86 0.08 262);
+  --color-accent-300: oklch(0.75 0.12 262);
   --color-accent-400: oklch(0.64 0.16 262);
   --color-accent-500: oklch(0.56 0.19 262);
   --color-accent-600: oklch(0.5 0.2 262);
   --color-accent-700: oklch(0.43 0.19 262);
+  --color-accent-800: oklch(0.34 0.15 262);
+  --color-accent-900: oklch(0.27 0.11 262);
 
   /* Paired accent — a cyan, used only for gentle gradients/glows. */
   --color-accent2-400: oklch(0.72 0.13 210);
   --color-accent2-500: oklch(0.64 0.14 205);
 
+  /* Operational status ramp — instrument-panel semantics. Each carries a
+     lighter tint and a solid mid so badges, meters and rails read the same
+     everywhere. */
+  --color-success-400: oklch(0.7 0.15 155);
   --color-success-500: oklch(0.62 0.15 155);
+  --color-success-600: oklch(0.54 0.14 155);
+  --color-warning-400: oklch(0.82 0.15 80);
   --color-warning-500: oklch(0.76 0.15 80);
+  --color-warning-600: oklch(0.68 0.15 70);
+  --color-danger-400: oklch(0.66 0.22 25);
   --color-danger-500: oklch(0.58 0.22 25);
+  --color-danger-600: oklch(0.51 0.21 25);
 
-  --radius-panel: 0.85rem;
-
-  /* One shared easing for hovers/toggles across the app. */
+  /* One shared easing for hovers/toggles/expansions across the app. */
   --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
@@ -43,18 +71,24 @@
 
   /* Surfaces carry the faintest cool hue so the UI reads crisp, not clinical. */
   --surface-0: oklch(1 0 0);
-  --surface-1: oklch(0.985 0.003 255);
-  --surface-2: oklch(0.96 0.005 255);
-  --border-subtle: oklch(0.9 0.006 255);
+  --surface-1: oklch(0.982 0.003 255);
+  --surface-2: oklch(0.955 0.005 255);
+  --surface-inset: oklch(0.945 0.006 255);
+  --border-subtle: oklch(0.895 0.006 255);
+  --border-strong: oklch(0.82 0.008 255);
   --text-primary: oklch(0.2 0.01 260);
-  --text-secondary: oklch(0.45 0.01 260);
-  --text-tertiary: oklch(0.6 0.008 260);
+  --text-secondary: oklch(0.44 0.01 260);
+  --text-tertiary: oklch(0.58 0.008 260);
 
-  /* Soft elevation — layered, low-opacity, cool-tinted. */
+  /* Soft, border-defined elevation — layered, low-opacity, cool-tinted. */
   --elevation-1: 0 1px 2px oklch(0.2 0.03 260 / 0.05), 0 1px 3px oklch(0.2 0.03 260 / 0.06);
   --elevation-2: 0 4px 12px oklch(0.2 0.03 260 / 0.08), 0 2px 4px oklch(0.2 0.03 260 / 0.05);
+  --elevation-3: 0 12px 32px oklch(0.2 0.03 260 / 0.12), 0 4px 8px oklch(0.2 0.03 260 / 0.06);
   --glow-accent: 0 0 0 1px oklch(0.56 0.19 262 / 0.15), 0 6px 20px oklch(0.56 0.19 262 / 0.18);
-  /* Ambient wash behind the app shell. */
+
+  /* Hairline grid + ambient wash behind the app shell — an engineered
+     drawing-board texture, barely there. */
+  --grid-line: oklch(0.2 0.03 260 / 0.03);
   --app-bg:
     radial-gradient(1200px 600px at 100% -10%, oklch(0.56 0.19 262 / 0.06), transparent 60%),
     radial-gradient(1000px 500px at -10% 110%, oklch(0.64 0.14 205 / 0.05), transparent 55%);
@@ -63,18 +97,24 @@
 .dark {
   color-scheme: dark;
 
-  /* Deep, faintly blue surfaces — the "future" tint lives here. */
-  --surface-0: oklch(0.19 0.012 264);
-  --surface-1: oklch(0.16 0.012 264);
-  --surface-2: oklch(0.235 0.014 264);
-  --border-subtle: oklch(0.31 0.014 264);
-  --text-primary: oklch(0.96 0.004 260);
-  --text-secondary: oklch(0.73 0.008 260);
-  --text-tertiary: oklch(0.56 0.01 260);
+  /* Deep, faintly blue "control room" surfaces with real separation between
+     layers — the industrial tint and the contrast both live here. */
+  --surface-0: oklch(0.205 0.013 264);
+  --surface-1: oklch(0.165 0.012 264);
+  --surface-2: oklch(0.25 0.015 264);
+  --surface-inset: oklch(0.14 0.011 264);
+  --border-subtle: oklch(0.32 0.015 264);
+  --border-strong: oklch(0.42 0.018 264);
+  --text-primary: oklch(0.97 0.004 260);
+  --text-secondary: oklch(0.75 0.008 260);
+  --text-tertiary: oklch(0.6 0.01 260);
 
   --elevation-1: 0 1px 2px oklch(0 0 0 / 0.3), 0 1px 3px oklch(0 0 0 / 0.4);
   --elevation-2: 0 8px 24px oklch(0 0 0 / 0.45), 0 2px 6px oklch(0 0 0 / 0.35);
+  --elevation-3: 0 20px 48px oklch(0 0 0 / 0.55), 0 6px 12px oklch(0 0 0 / 0.4);
   --glow-accent: 0 0 0 1px oklch(0.64 0.16 262 / 0.35), 0 8px 28px oklch(0.56 0.19 262 / 0.35);
+
+  --grid-line: oklch(1 0 0 / 0.025);
   --app-bg:
     radial-gradient(1200px 600px at 100% -10%, oklch(0.56 0.19 262 / 0.12), transparent 60%),
     radial-gradient(1000px 500px at -10% 110%, oklch(0.64 0.14 205 / 0.08), transparent 55%);
@@ -100,6 +140,11 @@
   [data-tabular] {
     font-variant-numeric: tabular-nums;
   }
+
+  /* Headings inherit the tighter tracking that reads as "engineered". */
+  h1, h2, h3 {
+    letter-spacing: -0.011em;
+  }
 }
 
 @keyframes skeleton-shimmer {
@@ -108,20 +153,75 @@
   }
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 @layer utilities {
   /* Reusable surface treatments the refresh leans on. */
-  .elevation-1 {
-    box-shadow: var(--elevation-1);
-  }
-  .elevation-2 {
-    box-shadow: var(--elevation-2);
-  }
-  .glow-accent {
-    box-shadow: var(--glow-accent);
-  }
+  .elevation-1 { box-shadow: var(--elevation-1); }
+  .elevation-2 { box-shadow: var(--elevation-2); }
+  .elevation-3 { box-shadow: var(--elevation-3); }
+  .glow-accent { box-shadow: var(--glow-accent); }
+
   .app-surface {
     background: var(--surface-1);
     background-image: var(--app-bg);
     background-attachment: fixed;
+  }
+
+  /* A faint engineered grid — used behind hero/dashboard headers so the app
+     feels like an instrument, not a blank canvas. Barely perceptible. */
+  .industrial-grid {
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Uppercase machine-label for section headers, table eyebrows, stat captions.
+     The single most identity-defining type treatment in the system. */
+  .eyebrow {
+    font-size: 0.6875rem;
+    line-height: 1;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+  }
+
+  /* Big instrument readout — tabular, tight, confident. */
+  .stat-value {
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+    font-weight: 650;
+  }
+
+  .font-tabular { font-variant-numeric: tabular-nums; }
+
+  /* Standard focus ring, reusable on non-button interactive surfaces. */
+  .focus-ring {
+    outline: none;
+  }
+  .focus-ring:focus-visible {
+    box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 4px var(--color-accent-500);
+    border-radius: var(--radius-md);
+  }
+
+  .animate-fade-in { animation: fade-in 0.2s var(--ease-out-soft) both; }
+  .animate-rise-in { animation: rise-in 0.28s var(--ease-out-soft) both; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
   }
 }

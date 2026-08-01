@@ -1,78 +1,62 @@
-import { NavLink } from 'react-router';
-import { NAV_ITEMS } from '@/app/navigation';
-import { usePermissions } from '@/hooks/usePermissions';
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { SidebarNav } from '@/components/layout/SidebarNav';
+import { useSidebarCollapsed } from '@/hooks/useSidebar';
 import { cn } from '@/lib/cn';
 
+/**
+ * Desktop navigation rail. Grouped sections (see SidebarNav) with a persisted
+ * collapse-to-icons mode for power users who want maximum canvas. Hidden below
+ * `md` — small screens get the Topbar's drawer instead.
+ */
 export function Sidebar() {
-  const { canAny } = usePermissions();
-
-  const visibleItems = NAV_ITEMS.filter((item) => !item.permissions || canAny(item.permissions));
+  const [collapsed, toggle] = useSidebarCollapsed();
 
   return (
-    <aside className="hidden w-56 shrink-0 flex-col border-r border-(--border-subtle) bg-(--surface-0)/70 backdrop-blur-xl md:flex">
-      <div className="flex h-14 items-center gap-2 px-4">
-        {/* Logo mark — a small gradient chip, the one flash of accent up top. */}
-        <span className="flex h-6 w-6 items-center justify-center rounded-md bg-gradient-to-br from-accent-400 to-accent2-500 text-[11px] font-bold text-white shadow-sm">
+    <aside
+      className={cn(
+        'hidden shrink-0 flex-col border-r border-(--border-subtle) bg-(--surface-0)/70 backdrop-blur-xl transition-[width] duration-200 [transition-timing-function:var(--ease-out-soft)] md:flex',
+        collapsed ? 'w-16' : 'w-60',
+      )}
+    >
+      <div
+        className={cn(
+          'flex h-14 items-center gap-2.5 border-b border-(--border-subtle) px-4',
+          collapsed && 'justify-center px-0',
+        )}
+      >
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-gradient-to-br from-accent-400 to-accent2-500 text-xs font-bold text-white shadow-sm">
           F
         </span>
-        <span className="text-sm font-semibold tracking-tight text-(--text-primary)">FleetOS</span>
+        {!collapsed && (
+          <div className="flex flex-1 flex-col leading-none">
+            <span className="text-sm font-semibold tracking-tight text-(--text-primary)">FleetHQ</span>
+            <span className="eyebrow mt-0.5">Fleet Operations</span>
+          </div>
+        )}
       </div>
-      <nav className="flex-1 space-y-0.5 overflow-y-auto px-2 py-2">
-        {visibleItems.map((item) => {
-          const Icon = item.icon;
 
-          if (item.status === 'coming-soon') {
-            return (
-              <div
-                key={item.path}
-                className="flex cursor-not-allowed items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-sm text-(--text-tertiary) opacity-60"
-                title="Coming soon"
-              >
-                <span className="flex items-center gap-2.5">
-                  <Icon className="h-4 w-4" />
-                  {item.label}
-                </span>
-                <span className="rounded-full bg-(--surface-2) px-1.5 py-0.5 text-[10px] font-medium">Soon</span>
-              </div>
-            );
-          }
+      <SidebarNav collapsed={collapsed} />
 
-          return (
-            <NavLink
-              key={item.path}
-              to={item.path}
-              end={item.path === '/'}
-              className={({ isActive }) =>
-                cn(
-                  'group relative flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm font-medium transition-all duration-200 [transition-timing-function:var(--ease-out-soft)]',
-                  isActive
-                    ? 'bg-accent-500/10 text-accent-600 dark:text-accent-200'
-                    : 'text-(--text-secondary) hover:bg-(--surface-2) hover:text-(--text-primary)',
-                )
-              }
-            >
-              {({ isActive }) => (
-                <>
-                  {/* Active accent rail. */}
-                  <span
-                    className={cn(
-                      'absolute left-0 top-1/2 h-4 w-0.5 -translate-y-1/2 rounded-full bg-accent-500 transition-opacity duration-200',
-                      isActive ? 'opacity-100' : 'opacity-0',
-                    )}
-                  />
-                  <Icon
-                    className={cn(
-                      'h-4 w-4 transition-transform duration-200 [transition-timing-function:var(--ease-out-soft)]',
-                      isActive ? 'text-accent-500' : 'group-hover:scale-110',
-                    )}
-                  />
-                  {item.label}
-                </>
-              )}
-            </NavLink>
-          );
-        })}
-      </nav>
+      <div className="border-t border-(--border-subtle) p-2">
+        <button
+          type="button"
+          onClick={toggle}
+          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className={cn(
+            'flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-sm font-medium text-(--text-tertiary) transition-colors hover:bg-(--surface-2) hover:text-(--text-primary)',
+            collapsed && 'justify-center px-0',
+          )}
+        >
+          {collapsed ? (
+            <PanelLeftOpen className="h-[1.05rem] w-[1.05rem]" />
+          ) : (
+            <>
+              <PanelLeftClose className="h-[1.05rem] w-[1.05rem]" />
+              <span>Collapse</span>
+            </>
+          )}
+        </button>
+      </div>
     </aside>
   );
 }

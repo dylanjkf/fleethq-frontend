@@ -3,6 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { listUsers } from '@/api/users';
 import { Button } from '@/components/ui/button';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
+import { PickerError } from '@/components/ui/picker-error';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { describeApiError } from '@/lib/errors';
@@ -48,6 +49,8 @@ export function UserDeployDrawer({
         <div className="flex-1 space-y-1">
           {usersQuery.isLoading ? (
             <Skeleton className="h-10 w-full" />
+          ) : usersQuery.isError ? (
+            <PickerError query={usersQuery} noun="users" />
           ) : users.length === 0 ? (
             <p className="py-4 text-center text-sm text-(--text-tertiary)">No users yet.</p>
           ) : (

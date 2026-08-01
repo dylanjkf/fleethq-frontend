@@ -7,10 +7,12 @@ import { ApiClientError } from '@/api/client';
 import type { Operator } from '@/api/types';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Panel, PanelDescription, PanelHeader, PanelTitle } from '@/components/ui/panel';
 import { Skeleton } from '@/components/ui/skeleton';
 import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
+import { describeApiError } from '@/lib/errors';
 import { PERMISSIONS } from '@/lib/permissions';
 
 /**
@@ -135,6 +137,8 @@ export function MessagesPage() {
         <div className="flex max-h-[560px] flex-col gap-1 overflow-y-auto rounded-lg border border-(--border-subtle) p-2">
           {operatorsQuery.isLoading ? (
             Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)
+          ) : operatorsQuery.isError ? (
+            <ErrorState message={describeApiError(operatorsQuery.error)} onRetry={() => operatorsQuery.refetch()} />
           ) : operators.length === 0 ? (
             <p className="p-3 text-sm text-(--text-tertiary)">No operators yet.</p>
           ) : (
@@ -180,6 +184,8 @@ export function MessagesPage() {
                       <Skeleton className="h-12 w-3/4 rounded-2xl" />
                     </div>
                   </>
+                ) : threadQuery.isError ? (
+                  <ErrorState message={describeApiError(threadQuery.error)} onRetry={() => threadQuery.refetch()} />
                 ) : messages.length === 0 ? (
                   <p className="text-sm text-(--text-secondary)">No messages yet. Start the conversation below.</p>
                 ) : (
