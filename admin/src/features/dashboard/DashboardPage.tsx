@@ -36,10 +36,21 @@ export function DashboardPage() {
       <h1 className="text-xl font-semibold">Dashboard</h1>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <StatCard label="Active organisations" value={overview.organisations.active} sub={`${overview.organisations.total} total`} />
-        <StatCard label="On trial" value={overview.trials.active} />
-        <StatCard label="Total users" value={overview.users.total} sub={`+${overview.users.newLast30Days} last 30d`} />
+        <StatCard
+          label="Active organisations"
+          value={overview.organisations.active}
+          sub={`${overview.organisations.total} total · +${overview.organisations.newToday} today`}
+        />
+        <StatCard label="On trial" value={overview.trials.active} sub={`${overview.organisations.cancelled} cancelled`} />
+        <StatCard label="Total users" value={overview.users.total} sub={`+${overview.users.newLast30Days} / 30d · +${overview.users.newToday} today`} />
         <StatCard label="Fleet" value={overview.fleet.assets} sub={`${overview.fleet.operators} operators`} />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <StatCard label="Inspections" value={overview.operations.inspections} sub={`+${overview.operations.inspectionsToday} today`} />
+        <StatCard label="Open defects" value={overview.operations.openDefects} sub={`+${overview.operations.defectsReportedToday} reported today`} />
+        <StatCard label="New signups today" value={overview.organisations.newToday} />
+        <StatCard label="Suspended orgs" value={overview.organisations.suspended} />
       </div>
 
       <Card>

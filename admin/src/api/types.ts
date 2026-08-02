@@ -110,10 +110,11 @@ export interface CustomerUserDetail {
 // ── Analytics ─────────────────────────────────────────────────────────────
 
 export interface AnalyticsOverview {
-  organisations: { active: number; suspended: number; archived: number; total: number };
+  organisations: { active: number; suspended: number; archived: number; cancelled: number; total: number; newToday: number };
   trials: { active: number };
-  users: { total: number; newLast30Days: number };
+  users: { total: number; newLast30Days: number; newToday: number };
   fleet: { assets: number; operators: number };
+  operations: { inspections: number; inspectionsToday: number; openDefects: number; defectsReportedToday: number };
   subscriptions: Partial<Record<SubscriptionStatus, number>>;
   churn: { canceledLast30Days: number; windowDays: number };
   revenue: {
