@@ -7,12 +7,16 @@ import { Button } from '@/components/ui/Button';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { PageSpinner } from '@/components/ui/Spinner';
 import { ErrorState } from '@/components/ui/EmptyState';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ApiClientError } from '@/api/client';
+import { useToast } from '@/hooks/useToast';
 
 export function CustomerUserDetailPage() {
   const { userId } = useParams<{ userId: string }>();
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [confirmAction, setConfirmAction] = useState<'disable' | 'resetMfa' | null>(null);
 
   const query = useQuery({ queryKey: ['customer-user', userId], queryFn: () => customerUsersApi.getCustomerUser(userId!), enabled: !!userId });
 
@@ -20,10 +24,22 @@ export function CustomerUserDetailPage() {
     void queryClient.invalidateQueries({ queryKey: ['customer-user', userId] });
   }
 
-  const disableMutation = useMutation({ mutationFn: () => customerUsersApi.disableCustomerUser(userId!), onSuccess: invalidate });
+  const disableMutation = useMutation({
+    mutationFn: () => customerUsersApi.disableCustomerUser(userId!),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Account disabled.');
+    },
+  });
   const reactivateMutation = useMutation({ mutationFn: () => customerUsersApi.reactivateCustomerUser(userId!), onSuccess: invalidate });
   const unlockMutation = useMutation({ mutationFn: () => customerUsersApi.unlockCustomerUser(userId!), onSuccess: invalidate });
-  const resetMfaMutation = useMutation({ mutationFn: () => customerUsersApi.resetCustomerUserMfa(userId!), onSuccess: invalidate });
+  const resetMfaMutation = useMutation({
+    mutationFn: () => customerUsersApi.resetCustomerUserMfa(userId!),
+    onSuccess: () => {
+      invalidate();
+      toast.success('MFA reset — the user will re-enrol on next sign-in.');
+    },
+  });
   const passwordResetMutation = useMutation({
     mutationFn: () => customerUsersApi.sendCustomerPasswordReset(userId!),
     onSuccess: (result) => setFeedback(result.emailOnFile ? 'Password reset email sent.' : 'No email on file — nothing was sent.'),
@@ -65,7 +81,7 @@ export function CustomerUserDetailPage() {
               Reactivate
             </Button>
           ) : (
-            <Button variant="danger" size="sm" onClick={() => disableMutation.mutate()} disabled={disableMutation.isPending}>
+            <Button variant="danger" size="sm" onClick={() => setConfirmAction('disable')} disabled={disableMutation.isPending}>
               Disable
             </Button>
           )}
@@ -75,7 +91,7 @@ export function CustomerUserDetailPage() {
             </Button>
           )}
           {user.mfaEnabled && (
-            <Button variant="secondary" size="sm" onClick={() => resetMfaMutation.mutate()} disabled={resetMfaMutation.isPending}>
+            <Button variant="secondary" size="sm" onClick={() => setConfirmAction('resetMfa')} disabled={resetMfaMutation.isPending}>
               Reset MFA
             </Button>
           )}
@@ -112,6 +128,35 @@ export function CustomerUserDetailPage() {
           <p className="px-5 py-4 text-sm text-(--text-tertiary)">No active memberships.</p>
         )}
       </Card>
+
+      {confirmAction === 'disable' && (
+        <ConfirmDialog
+          title="Disable account"
+          description="Immediately blocks this user from signing in to any of their organisations. Record why."
+          confirmLabel="Disable account"
+          danger
+          requireReason
+          onConfirm={async () => {
+            await disableMutation.mutateAsync();
+            setConfirmAction(null);
+          }}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {confirmAction === 'resetMfa' && (
+        <ConfirmDialog
+          title="Reset MFA"
+          description="Removes this user's multi-factor enrolment; they can sign in with only their password until they re-enrol. Record why."
+          confirmLabel="Reset MFA"
+          danger
+          requireReason
+          onConfirm={async () => {
+            await resetMfaMutation.mutateAsync();
+            setConfirmAction(null);
+          }}
+          onCancel={() => setConfirmAction(null)}
+        />
+      )}
     </div>
   );
 }

@@ -7,8 +7,11 @@ import { Badge } from '@/components/ui/Badge';
 import { Input, Textarea } from '@/components/ui/Input';
 import { PageSpinner } from '@/components/ui/Spinner';
 import { EmptyState, ErrorState } from '@/components/ui/EmptyState';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ApiClientError } from '@/api/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
+import type { FeatureFlag } from '@/api/types';
 
 function CreateForm({ onCreated }: { onCreated: () => void }) {
   const [key, setKey] = useState('');
@@ -48,6 +51,8 @@ function CreateForm({ onCreated }: { onCreated: () => void }) {
 export function FeatureFlagsPage() {
   const queryClient = useQueryClient();
   const { hasPermission } = useAuth();
+  const toast = useToast();
+  const [flagToDelete, setFlagToDelete] = useState<FeatureFlag | null>(null);
   const query = useQuery({ queryKey: ['feature-flags'], queryFn: flagsApi.listFeatureFlags });
 
   function invalidate() {
@@ -58,7 +63,13 @@ export function FeatureFlagsPage() {
     mutationFn: ({ id, globalEnabled }: { id: string; globalEnabled: boolean }) => flagsApi.updateFeatureFlag(id, { globalEnabled }),
     onSuccess: invalidate,
   });
-  const deleteMutation = useMutation({ mutationFn: (id: string) => flagsApi.deleteFeatureFlag(id), onSuccess: invalidate });
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => flagsApi.deleteFeatureFlag(id),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Feature flag deleted.');
+    },
+  });
 
   return (
     <div className="space-y-4">
@@ -103,7 +114,7 @@ export function FeatureFlagsPage() {
                       >
                         {flag.globalEnabled ? 'Disable globally' : 'Enable globally'}
                       </Button>
-                      <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate(flag.id)} disabled={deleteMutation.isPending}>
+                      <Button variant="ghost" size="sm" onClick={() => setFlagToDelete(flag)} disabled={deleteMutation.isPending}>
                         Delete
                       </Button>
                     </div>
@@ -116,6 +127,20 @@ export function FeatureFlagsPage() {
           <EmptyState title="No feature flags yet" description="Create one above — a gated route treats a missing flag as enabled, so this is always safe." />
         )}
       </Card>
+
+      {flagToDelete && (
+        <ConfirmDialog
+          title="Delete feature flag"
+          description={`Permanently deletes "${flagToDelete.name}" (${flagToDelete.key}) and its per-organisation overrides. A gated route treats a missing flag as enabled.`}
+          confirmLabel="Delete"
+          danger
+          onConfirm={async () => {
+            await deleteMutation.mutateAsync(flagToDelete.id);
+            setFlagToDelete(null);
+          }}
+          onCancel={() => setFlagToDelete(null)}
+        />
+      )}
     </div>
   );
 }

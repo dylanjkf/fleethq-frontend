@@ -8,8 +8,10 @@ import { Badge } from '@/components/ui/Badge';
 import { Input, Select, Textarea } from '@/components/ui/Input';
 import { PageSpinner } from '@/components/ui/Spinner';
 import { EmptyState, ErrorState } from '@/components/ui/EmptyState';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { ApiClientError } from '@/api/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
 
 function severityTone(severity: AnnouncementSeverity): 'accent' | 'warning' | 'danger' {
   if (severity === 'CRITICAL') return 'danger';
@@ -57,11 +59,19 @@ function CreateForm({ onCreated }: { onCreated: () => void }) {
 }
 
 function AnnouncementRow({ announcement, onChanged }: { announcement: Announcement; onChanged: () => void }) {
+  const toast = useToast();
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const toggleMutation = useMutation({
     mutationFn: () => supportApi.updateAnnouncement(announcement.id, { active: !announcement.active }),
     onSuccess: onChanged,
   });
-  const deleteMutation = useMutation({ mutationFn: () => supportApi.deleteAnnouncement(announcement.id), onSuccess: onChanged });
+  const deleteMutation = useMutation({
+    mutationFn: () => supportApi.deleteAnnouncement(announcement.id),
+    onSuccess: () => {
+      onChanged();
+      toast.success('Announcement deleted.');
+    },
+  });
 
   return (
     <div className="flex items-start justify-between gap-4 border-b border-(--border-subtle) px-5 py-4 last:border-0">
@@ -77,10 +87,23 @@ function AnnouncementRow({ announcement, onChanged }: { announcement: Announceme
         <Button variant="ghost" size="sm" onClick={() => toggleMutation.mutate()} disabled={toggleMutation.isPending}>
           {announcement.active ? 'Deactivate' : 'Activate'}
         </Button>
-        <Button variant="ghost" size="sm" onClick={() => deleteMutation.mutate()} disabled={deleteMutation.isPending}>
+        <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(true)} disabled={deleteMutation.isPending}>
           Delete
         </Button>
       </div>
+      {confirmDelete && (
+        <ConfirmDialog
+          title="Delete announcement"
+          description={`Permanently deletes "${announcement.title}". Any customer currently seeing it will stop.`}
+          confirmLabel="Delete"
+          danger
+          onConfirm={async () => {
+            await deleteMutation.mutateAsync();
+            setConfirmDelete(false);
+          }}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
     </div>
   );
 }
