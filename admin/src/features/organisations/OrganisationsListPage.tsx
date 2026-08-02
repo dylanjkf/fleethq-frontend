@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
 import { listOrganisations } from '@/api/organisations';
+import { useAuth } from '@/hooks/useAuth';
+import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input, Select } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
@@ -21,6 +23,7 @@ function statusBadge(org: OrganisationSummary) {
 }
 
 export function OrganisationsListPage() {
+  const { hasPermission } = useAuth();
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<'active' | 'suspended' | 'archived' | 'all'>('active');
@@ -34,6 +37,11 @@ export function OrganisationsListPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Organisations</h1>
+        {hasPermission('organisations:create') && (
+          <Link to="/organisations/new">
+            <Button>New customer login</Button>
+          </Link>
+        )}
       </div>
 
       <div className="flex gap-3">
