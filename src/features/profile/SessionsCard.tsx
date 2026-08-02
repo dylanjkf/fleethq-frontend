@@ -2,7 +2,9 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ErrorState } from '@/components/ui/error-state';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
+import { describeApiError } from '@/lib/errors';
 import * as authApi from '@/api/auth';
 
 /** Self-service device/session management — mirrors the FleetHQ admin platform's own SessionsCard. */
@@ -23,6 +25,12 @@ export function SessionsCard() {
       <CardContent>
         {query.isLoading ? (
           <p className="text-sm text-(--text-tertiary)">Loading…</p>
+        ) : query.isError ? (
+          <ErrorState
+            title="Couldn't load sessions"
+            message={describeApiError(query.error)}
+            onRetry={() => void query.refetch()}
+          />
         ) : !query.data?.length ? (
           <p className="text-sm text-(--text-tertiary)">No active sessions.</p>
         ) : (

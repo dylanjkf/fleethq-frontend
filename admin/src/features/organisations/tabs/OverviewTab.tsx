@@ -15,11 +15,14 @@ import { Card, CardBody } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { Input } from '@/components/ui/Input';
+import { useToast } from '@/hooks/useToast';
 import { CreateUserDialog } from './CreateUserDialog';
 
 export function OverviewTab({ org }: { org: OrganisationDetail }) {
   const queryClient = useQueryClient();
+  const toast = useToast();
   const [confirmAction, setConfirmAction] = useState<'suspend' | 'archive' | null>(null);
+  const [impersonateUserId, setImpersonateUserId] = useState<string | null>(null);
   const [trialDraft, setTrialDraft] = useState(org.trialEndsAt ? org.trialEndsAt.slice(0, 10) : '');
   const [impersonation, setImpersonation] = useState<{ accessToken: string; expiresIn: string } | null>(null);
   const [createUserOpen, setCreateUserOpen] = useState(false);
@@ -28,17 +31,44 @@ export function OverviewTab({ org }: { org: OrganisationDetail }) {
     void queryClient.invalidateQueries({ queryKey: ['organisation', org.id] });
   }
 
-  const suspendMutation = useMutation({ mutationFn: (reason: string) => suspendOrganisation(org.id, reason), onSuccess: invalidate });
-  const restoreMutation = useMutation({ mutationFn: () => restoreOrganisation(org.id), onSuccess: invalidate });
-  const archiveMutation = useMutation({ mutationFn: () => archiveOrganisation(org.id), onSuccess: invalidate });
-  const unarchiveMutation = useMutation({ mutationFn: () => unarchiveOrganisation(org.id), onSuccess: invalidate });
+  const suspendMutation = useMutation({
+    mutationFn: (reason: string) => suspendOrganisation(org.id, reason),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Organisation suspended.');
+    },
+  });
+  const restoreMutation = useMutation({
+    mutationFn: () => restoreOrganisation(org.id),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Organisation restored.');
+    },
+  });
+  const archiveMutation = useMutation({
+    mutationFn: () => archiveOrganisation(org.id),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Organisation archived.');
+    },
+  });
+  const unarchiveMutation = useMutation({
+    mutationFn: () => unarchiveOrganisation(org.id),
+    onSuccess: () => {
+      invalidate();
+      toast.success('Organisation unarchived.');
+    },
+  });
   const trialMutation = useMutation({
     mutationFn: (trialEndsAt: string | null) => updateTrial(org.id, trialEndsAt),
     onSuccess: invalidate,
   });
   const impersonateMutation = useMutation({
     mutationFn: (userId: string) => impersonateUser(org.id, userId),
-    onSuccess: (result) => setImpersonation(result),
+    onSuccess: (result) => {
+      setImpersonation(result);
+      toast.success('Impersonation session started.');
+    },
   });
 
   return (
@@ -132,7 +162,7 @@ export function OverviewTab({ org }: { org: OrganisationDetail }) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={() => impersonateMutation.mutate(u.userId)}
+                    onClick={() => setImpersonateUserId(u.userId)}
                     disabled={impersonateMutation.isPending || !!org.suspendedAt || !!org.archivedAt}
                   >
                     Impersonate
@@ -169,6 +199,20 @@ export function OverviewTab({ org }: { org: OrganisationDetail }) {
             setConfirmAction(null);
           }}
           onCancel={() => setConfirmAction(null)}
+        />
+      )}
+      {impersonateUserId && (
+        <ConfirmDialog
+          title="Impersonate user"
+          description="Mints a live customer session token for this user. Their account activity during the session is attributed to this impersonation. Record why you need it."
+          confirmLabel="Impersonate"
+          danger
+          requireReason
+          onConfirm={async () => {
+            await impersonateMutation.mutateAsync(impersonateUserId);
+            setImpersonateUserId(null);
+          }}
+          onCancel={() => setImpersonateUserId(null)}
         />
       )}
       {impersonation && (

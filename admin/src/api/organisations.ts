@@ -18,6 +18,30 @@ export async function getOrganisation(id: string): Promise<OrganisationDetail> {
   return data;
 }
 
+export interface CreateOrganisationInput {
+  companyName: string;
+  adminEmail: string;
+  adminFullName?: string;
+}
+
+/**
+ * The temporary credentials are returned exactly once and never persisted in
+ * plaintext — show them immediately and don't refetch. `username` is the login
+ * (the admin's email); the account must change `temporaryPassword` at first
+ * sign-in.
+ */
+export interface IssuedCustomerLogin {
+  companyId: string;
+  companyName: string;
+  username: string;
+  temporaryPassword: string;
+}
+
+export async function createOrganisation(input: CreateOrganisationInput): Promise<IssuedCustomerLogin> {
+  const { data } = await apiClient.post<IssuedCustomerLogin>('/v1/admin/organisations', input);
+  return data;
+}
+
 export async function suspendOrganisation(id: string, reason: string): Promise<void> {
   await apiClient.post(`/v1/admin/organisations/${id}/suspend`, { reason });
 }

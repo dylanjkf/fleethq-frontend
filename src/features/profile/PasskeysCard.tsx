@@ -3,9 +3,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { startRegistration } from '@simplewebauthn/browser';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ErrorState } from '@/components/ui/error-state';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { ApiClientError } from '@/api/client';
+import { describeApiError } from '@/lib/errors';
 import * as authApi from '@/api/auth';
 
 /**
@@ -51,6 +53,12 @@ export function PasskeysCard() {
       <CardContent className="space-y-3">
         {query.isLoading ? (
           <p className="text-sm text-(--text-tertiary)">Loading…</p>
+        ) : query.isError ? (
+          <ErrorState
+            title="Couldn't load passkeys"
+            message={describeApiError(query.error)}
+            onRetry={() => void query.refetch()}
+          />
         ) : !query.data?.length ? (
           <p className="text-sm text-(--text-tertiary)">No passkeys yet.</p>
         ) : (

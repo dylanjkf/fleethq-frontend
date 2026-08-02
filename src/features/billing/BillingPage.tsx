@@ -65,8 +65,20 @@ export function BillingPage() {
   const [redirecting, setRedirecting] = useState(false);
 
   const { data, isLoading, isError, error, refetch } = useQuery({ queryKey: ['billing-status'], queryFn: getBillingStatus });
-  const { data: entitlements } = useQuery({ queryKey: ['billing-entitlements'], queryFn: getEntitlements });
-  const { data: plansData } = useQuery({ queryKey: ['billing-plans'], queryFn: getPlans });
+  const {
+    data: entitlements,
+    isLoading: entitlementsLoading,
+    isError: entitlementsError,
+    error: entitlementsErr,
+    refetch: refetchEntitlements,
+  } = useQuery({ queryKey: ['billing-entitlements'], queryFn: getEntitlements });
+  const {
+    data: plansData,
+    isLoading: plansLoading,
+    isError: plansError,
+    error: plansErr,
+    refetch: refetchPlans,
+  } = useQuery({ queryKey: ['billing-plans'], queryFn: getPlans });
 
   async function goToCheckout(priceId: string | null) {
     if (!priceId) {
@@ -166,8 +178,15 @@ export function BillingPage() {
                 )}
               </div>
 
-              {/* Plan picker */}
-              {plansData && plansData.plans.length > 0 && (
+              {/* Plan picker. The plans/entitlements queries are secondary to
+                  billing-status, so they get their own Skeleton/ErrorState —
+                  otherwise a failed fetch would make "Choose a plan" silently
+                  vanish rather than offer a retry. */}
+              {plansLoading || entitlementsLoading ? (
+                <Skeleton className="h-64 w-full" />
+              ) : plansError || entitlementsError ? (
+                <ErrorState message={describeApiError(plansErr ?? entitlementsErr)} onRetry={() => { void refetchPlans(); void refetchEntitlements(); }} />
+              ) : plansData && plansData.plans.length > 0 ? (
                 <div>
                   {entitlements &&
                     getUsageWarnings(entitlements.usage, entitlements.limits).map((warning) => (
@@ -206,7 +225,7 @@ export function BillingPage() {
                     </p>
                   )}
                 </div>
-              )}
+              ) : null}
             </>
           )}
         </div>
