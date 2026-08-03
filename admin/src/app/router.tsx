@@ -5,6 +5,7 @@ import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { OrganisationsListPage } from '@/features/organisations/OrganisationsListPage';
 import { NewCustomerLoginPage } from '@/features/organisations/NewCustomerLoginPage';
 import { OrganisationDetailPage } from '@/features/organisations/OrganisationDetailPage';
+import { CustomerUsersPage } from '@/features/customer-users/CustomerUsersPage';
 import { CustomerUserDetailPage } from '@/features/customer-users/CustomerUserDetailPage';
 import { AnnouncementsPage } from '@/features/support/AnnouncementsPage';
 import { FeatureFlagsPage } from '@/features/feature-flags/FeatureFlagsPage';
@@ -25,6 +26,7 @@ export const router = createBrowserRouter(
         { path: '/organisations', element: <OrganisationsListPage /> },
         { path: '/organisations/new', element: <NewCustomerLoginPage /> },
         { path: '/organisations/:id', element: <OrganisationDetailPage /> },
+        { path: '/customer-users', element: <CustomerUsersPage /> },
         { path: '/customer-users/:userId', element: <CustomerUserDetailPage /> },
         { path: '/announcements', element: <AnnouncementsPage /> },
         { path: '/feature-flags', element: <FeatureFlagsPage /> },
