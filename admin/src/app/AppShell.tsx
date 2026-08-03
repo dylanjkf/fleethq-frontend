@@ -15,6 +15,8 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/announcements', label: 'Announcements', permission: 'support:view' },
   { to: '/feature-flags', label: 'Feature Flags', permission: 'feature_flags:view' },
   { to: '/fleet', label: 'Fleet', permission: 'fleet:view' },
+  { to: '/inspections', label: 'Inspections', permission: 'inspections:view' },
+  { to: '/maintenance', label: 'Defects', permission: 'maintenance:view' },
   { to: '/system', label: 'System Health', permission: 'system:view' },
   { to: '/admin-users', label: 'Staff Accounts', permission: 'admin_users:view' },
   { to: '/audit-log', label: 'Audit Log', permission: 'audit_log:view' },

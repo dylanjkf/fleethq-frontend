@@ -11,6 +11,10 @@ import { AnnouncementsPage } from '@/features/support/AnnouncementsPage';
 import { FeatureFlagsPage } from '@/features/feature-flags/FeatureFlagsPage';
 import { SystemHealthPage } from '@/features/system/SystemHealthPage';
 import { FleetPage } from '@/features/fleet/FleetPage';
+import { InspectionsPage } from '@/features/inspections/InspectionsPage';
+import { InspectionDetailPage } from '@/features/inspections/InspectionDetailPage';
+import { MaintenancePage } from '@/features/maintenance/MaintenancePage';
+import { MaintenanceDetailPage } from '@/features/maintenance/MaintenanceDetailPage';
 import { AdminUsersPage } from '@/features/admin-users/AdminUsersPage';
 import { AuditLogPage } from '@/features/audit-log/AuditLogPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
@@ -32,6 +36,10 @@ export const router = createBrowserRouter(
         { path: '/feature-flags', element: <FeatureFlagsPage /> },
         { path: '/system', element: <SystemHealthPage /> },
         { path: '/fleet', element: <FleetPage /> },
+        { path: '/inspections', element: <InspectionsPage /> },
+        { path: '/inspections/:id', element: <InspectionDetailPage /> },
+        { path: '/maintenance', element: <MaintenancePage /> },
+        { path: '/maintenance/:id', element: <MaintenanceDetailPage /> },
         { path: '/admin-users', element: <AdminUsersPage /> },
         { path: '/audit-log', element: <AuditLogPage /> },
         { path: '/settings', element: <SettingsPage /> },
