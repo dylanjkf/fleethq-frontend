@@ -80,6 +80,15 @@ function MfaCard() {
     },
     onError: (err) => setError(err instanceof ApiClientError ? err.message : 'Could not disable MFA.'),
   });
+  const regenerateMutation = useMutation({
+    mutationFn: (c: string) => authApi.regenerateBackupCodes(c),
+    onSuccess: (result) => {
+      setBackupCodes(result.backupCodes);
+      setCode('');
+      setError(null);
+    },
+    onError: (err) => setError(err instanceof ApiClientError ? err.message : 'Could not regenerate backup codes.'),
+  });
 
   return (
     <Card>
@@ -87,30 +96,9 @@ function MfaCard() {
         <h2 className="text-sm font-semibold">Two-factor authentication</h2>
       </CardHeader>
       <CardBody className="space-y-3">
-        {admin?.mfaEnabled ? (
-          <>
-            <p className="text-sm text-(--text-secondary)">MFA is enabled on your account.</p>
-            <div className="flex max-w-xs gap-2">
-              <Input placeholder="Current code" value={code} onChange={(e) => setCode(e.target.value)} />
-              <Button variant="danger" size="sm" onClick={() => disableMutation.mutate(code)} disabled={!code || disableMutation.isPending}>
-                Disable
-              </Button>
-            </div>
-          </>
-        ) : enrolling ? (
+        {backupCodes ? (
           <div className="space-y-2">
-            <p className="text-sm text-(--text-secondary)">Scan this in your authenticator app, or enter the secret manually:</p>
-            <code className="block break-all rounded bg-(--surface-2) px-2 py-1 text-xs">{enrolling.secret}</code>
-            <div className="flex max-w-xs gap-2">
-              <Input placeholder="6-digit code" value={code} onChange={(e) => setCode(e.target.value)} />
-              <Button size="sm" onClick={() => enableMutation.mutate(code)} disabled={!code || enableMutation.isPending}>
-                Confirm
-              </Button>
-            </div>
-          </div>
-        ) : backupCodes ? (
-          <div className="space-y-2">
-            <p className="text-sm font-medium">MFA enabled. Save these one-time backup codes somewhere safe:</p>
+            <p className="text-sm font-medium">Save these one-time backup codes somewhere safe — each works once. Any earlier codes are now invalid.</p>
             <ul className="grid grid-cols-2 gap-1 font-mono text-xs">
               {backupCodes.map((c) => (
                 <li key={c} className="rounded bg-(--surface-2) px-2 py-1">
@@ -121,6 +109,34 @@ function MfaCard() {
             <Button variant="secondary" size="sm" onClick={() => setBackupCodes(null)}>
               Done
             </Button>
+          </div>
+        ) : admin?.mfaEnabled ? (
+          <>
+            <p className="text-sm text-(--text-secondary)">MFA is enabled on your account.</p>
+            <div className="flex max-w-md flex-wrap gap-2">
+              <Input placeholder="Current code" value={code} onChange={(e) => setCode(e.target.value)} />
+              <Button size="sm" onClick={() => regenerateMutation.mutate(code)} disabled={!code || regenerateMutation.isPending}>
+                Regenerate backup codes
+              </Button>
+              <Button variant="danger" size="sm" onClick={() => disableMutation.mutate(code)} disabled={!code || disableMutation.isPending}>
+                Disable
+              </Button>
+            </div>
+            <p className="text-xs text-(--text-tertiary)">Enter a current authenticator code (or an unused backup code) to regenerate a fresh set of backup codes or disable MFA.</p>
+          </>
+        ) : enrolling ? (
+          <div className="space-y-2">
+            <p className="text-sm text-(--text-secondary)">Add this to your authenticator app — tap the link on a phone to open it directly, or enter the secret manually:</p>
+            <a href={enrolling.otpauthUrl} className="block break-all rounded bg-(--surface-2) px-2 py-1 text-xs text-accent-400 underline">
+              Open in authenticator app
+            </a>
+            <code className="block break-all rounded bg-(--surface-2) px-2 py-1 text-xs">{enrolling.secret}</code>
+            <div className="flex max-w-xs gap-2">
+              <Input placeholder="6-digit code" value={code} onChange={(e) => setCode(e.target.value)} />
+              <Button size="sm" onClick={() => enableMutation.mutate(code)} disabled={!code || enableMutation.isPending}>
+                Confirm
+              </Button>
+            </div>
           </div>
         ) : (
           <Button size="sm" onClick={() => setupMutation.mutate()} disabled={setupMutation.isPending}>

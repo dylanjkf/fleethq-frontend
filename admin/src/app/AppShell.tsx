@@ -4,6 +4,33 @@ import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { getAdminAlerts } from '@/api/notifications';
 import { CommandPalette } from '@/components/CommandPalette';
+import { useModalDialog } from '@/hooks/useModalDialog';
+
+/**
+ * The mobile nav drawer, extracted so `useModalDialog` mounts *with* the drawer.
+ * The hook traps Tab focus inside the drawer, moves focus in on open, closes on
+ * Escape, and restores focus to the trigger on close — the same a11y contract the
+ * app's other overlays get. (It must be its own component: the hook's focus-in
+ * effect runs on mount, so it has to mount only when the drawer opens.)
+ */
+function MobileNavDrawer({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+  const drawerRef = useModalDialog<HTMLElement>(onClose);
+  return (
+    <div className="fixed inset-0 z-40 md:hidden">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden />
+      <aside
+        ref={drawerRef}
+        tabIndex={-1}
+        className="absolute inset-y-0 left-0 flex w-64 flex-col border-r border-(--border-subtle) bg-(--surface-1) p-4 focus:outline-none"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Navigation"
+      >
+        {children}
+      </aside>
+    </div>
+  );
+}
 
 interface NavItem {
   to: string;
@@ -115,20 +142,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         {sidebarContent}
       </aside>
 
-      {/* Mobile drawer + backdrop (below md) */}
-      {navOpen && (
-        <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setNavOpen(false)} aria-hidden />
-          <aside
-            className="absolute inset-y-0 left-0 flex w-64 flex-col border-r border-(--border-subtle) bg-(--surface-1) p-4"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Navigation"
-          >
-            {sidebarContent}
-          </aside>
-        </div>
-      )}
+      {/* Mobile drawer + backdrop (below md) — focus-trapped via useModalDialog */}
+      {navOpen && <MobileNavDrawer onClose={() => setNavOpen(false)}>{sidebarContent}</MobileNavDrawer>}
 
       <div className="flex flex-1 flex-col overflow-hidden">
         <header className="flex items-center justify-between border-b border-(--border-subtle) bg-(--surface-1) px-4 py-3 md:px-6">

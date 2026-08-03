@@ -178,7 +178,10 @@ function MfaEnrollStep() {
       </div>
       {enrolling ? (
         <form onSubmit={confirm} className="space-y-3">
-          <p className="text-xs text-(--text-secondary)">Add this secret to your authenticator app (Google Authenticator, 1Password, Authy…), then enter the 6-digit code it shows:</p>
+          <p className="text-xs text-(--text-secondary)">Add this to your authenticator app (Google Authenticator, 1Password, Authy…) — tap the link on a phone to open it directly, or enter the secret manually — then enter the 6-digit code it shows:</p>
+          <a href={enrolling.otpauthUrl} className="block break-all rounded bg-(--surface-2) px-2 py-1 text-xs text-accent-400 underline">
+            Open in authenticator app
+          </a>
           <code className="block break-all rounded bg-(--surface-2) px-2 py-1 text-xs">{enrolling.secret}</code>
           <label className="block text-sm">
             <span className="text-(--text-tertiary)">6-digit code</span>

@@ -19,6 +19,11 @@
   --color-accent2-500: oklch(0.64 0.14 205);
   --color-success-500: oklch(0.62 0.15 155);
   --color-warning-500: oklch(0.76 0.15 80);
+  /* danger-400 is the lighter danger used for text on the dark surfaces (and on
+     the danger-500/10 error tint): danger-500 (L≈0.58) is too dark against the
+     ~0.15–0.19 surfaces to clear WCAG AA for body text, so error copy uses the
+     lighter 400. danger-500 stays for solid fills / borders. */
+  --color-danger-400: oklch(0.72 0.17 25);
   --color-danger-500: oklch(0.58 0.22 25);
 
   --radius-panel: 0.75rem;

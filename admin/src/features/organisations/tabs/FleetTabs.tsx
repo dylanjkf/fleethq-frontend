@@ -10,10 +10,10 @@ import { ApiClientError } from '@/api/client';
 const PAGE_SIZE = 15;
 
 /** Assets registered to this organisation (the cross-tenant fleet endpoint scoped by companyId). */
-export function VehiclesTab({ companyId }: { companyId: string }) {
+export function AssetsTab({ companyId }: { companyId: string }) {
   const [page, setPage] = useState(1);
   const query = useQuery({
-    queryKey: ['org-vehicles', companyId, page],
+    queryKey: ['org-assets', companyId, page],
     queryFn: () => searchAssets({ companyId, page, pageSize: PAGE_SIZE }),
   });
 
@@ -47,10 +47,10 @@ export function VehiclesTab({ companyId }: { companyId: string }) {
 }
 
 /** Operators belonging to this organisation. */
-export function DriversTab({ companyId }: { companyId: string }) {
+export function OperatorsTab({ companyId }: { companyId: string }) {
   const [page, setPage] = useState(1);
   const query = useQuery({
-    queryKey: ['org-drivers', companyId, page],
+    queryKey: ['org-operators', companyId, page],
     queryFn: () => searchOperators({ companyId, page, pageSize: PAGE_SIZE }),
   });
 
