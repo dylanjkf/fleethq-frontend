@@ -19,12 +19,21 @@ export class ApiClientError extends Error {
 
 /**
  * The admin SPA is a separate deployable from the API (own origin in
- * production, e.g. admin.fleethq.online → api.fleethq.online), same
- * cross-origin reasoning as apps/driveros's client.ts. `VITE_API_BASE`
- * unset falls back to `/`, which vite.config.ts's dev proxy forwards to
- * `http://localhost:3000` — local dev only.
+ * production, e.g. served under fleethq.online/admin → api.fleethq.online).
+ *
+ * Base URL resolution, in order:
+ *   1. VITE_API_BASE — admin-specific override, if you deliberately point the
+ *      admin console at a different API.
+ *   2. VITE_API_URL — the SAME variable the customer app uses, so one env var
+ *      on a shared Vercel project configures both apps. Without this fallback
+ *      the admin build defaulted to `/` and POSTed the login to the static
+ *      host, which returns 405 (Method Not Allowed) instead of reaching the API.
+ *   3. `/` — local dev, where vite.config.ts's proxy forwards to localhost:3000.
  */
-export const apiClient = axios.create({ baseURL: import.meta.env.VITE_API_BASE || '/', timeout: 30_000 });
+export const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE || import.meta.env.VITE_API_URL || '/',
+  timeout: 30_000,
+});
 
 apiClient.interceptors.request.use((config) => {
   const token = tokenStore.get();
