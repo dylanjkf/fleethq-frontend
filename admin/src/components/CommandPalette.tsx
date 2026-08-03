@@ -11,6 +11,7 @@ const DESTINATIONS: { label: string; to: string; permission?: string }[] = [
   { label: 'Organisations', to: '/organisations', permission: 'organisations:view' },
   { label: 'New customer login', to: '/organisations/new', permission: 'organisations:create' },
   { label: 'Customer Users', to: '/customer-users', permission: 'customer_users:view' },
+  { label: 'Billing', to: '/billing', permission: 'billing:view' },
   { label: 'Inspections', to: '/inspections', permission: 'inspections:view' },
   { label: 'Defects', to: '/maintenance', permission: 'maintenance:view' },
   { label: 'Fleet', to: '/fleet', permission: 'fleet:view' },

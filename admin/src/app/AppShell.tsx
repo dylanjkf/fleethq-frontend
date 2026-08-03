@@ -16,6 +16,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/notifications', label: 'Alerts', permission: 'analytics:view' },
   { to: '/organisations', label: 'Organisations', permission: 'organisations:view' },
   { to: '/customer-users', label: 'Customer Users', permission: 'customer_users:view' },
+  { to: '/billing', label: 'Billing', permission: 'billing:view' },
   { to: '/announcements', label: 'Announcements', permission: 'support:view' },
   { to: '/feature-flags', label: 'Feature Flags', permission: 'feature_flags:view' },
   { to: '/fleet', label: 'Fleet', permission: 'fleet:view' },
@@ -24,6 +25,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/system', label: 'System Health', permission: 'system:view' },
   { to: '/admin-users', label: 'Staff Accounts', permission: 'admin_users:view' },
   { to: '/security', label: 'Security', permission: 'security:view' },
+  { to: '/platform-settings', label: 'Settings', permission: 'system:view' },
   { to: '/audit-log', label: 'Audit Log', permission: 'audit_log:view' },
 ];
 
