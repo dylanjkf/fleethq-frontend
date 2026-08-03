@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router';
-import { getOverview, getDailySignups, getTrialsExpiring } from '@/api/analytics';
+import { getOverview, getDailySignups, getTrialsExpiring, getActivity } from '@/api/analytics';
 import { Card, CardBody, CardHeader } from '@/components/ui/Card';
 import { Badge } from '@/components/ui/Badge';
 import { PageSpinner } from '@/components/ui/Spinner';
@@ -24,6 +24,7 @@ export function DashboardPage() {
   const overviewQuery = useQuery({ queryKey: ['analytics', 'overview'], queryFn: getOverview });
   const signupsQuery = useQuery({ queryKey: ['analytics', 'signups'], queryFn: () => getDailySignups(30) });
   const trialsQuery = useQuery({ queryKey: ['analytics', 'trials-expiring'], queryFn: () => getTrialsExpiring(7) });
+  const activityQuery = useQuery({ queryKey: ['analytics', 'activity'], queryFn: getActivity, refetchInterval: 60_000 });
 
   if (overviewQuery.isLoading) return <PageSpinner />;
   if (overviewQuery.isError) {
@@ -113,6 +114,30 @@ export function DashboardPage() {
           </CardBody>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-sm font-semibold">Live activity</h2>
+        </CardHeader>
+        <CardBody className="!px-0 !py-0">
+          {activityQuery.data?.items.length ? (
+            <ul className="divide-y divide-(--border-subtle)">
+              {activityQuery.data.items.map((e, idx) => (
+                <li key={`${e.type}-${idx}`} className="flex items-center justify-between px-5 py-3 text-sm">
+                  <Link to={e.href} className="flex items-center gap-2 hover:text-accent-400">
+                    <Badge tone={e.tone === 'danger' ? 'danger' : e.tone === 'warning' ? 'warning' : e.tone === 'success' ? 'success' : 'neutral'}>{e.type.replace(/_/g, ' ')}</Badge>
+                    <span>{e.title}</span>
+                    {e.subtitle && <span className="text-(--text-tertiary)">· {e.subtitle}</span>}
+                  </Link>
+                  <span className="shrink-0 text-xs text-(--text-tertiary)">{new Date(e.at).toLocaleString()}</span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="px-5 py-4 text-sm text-(--text-tertiary)">No recent activity.</p>
+          )}
+        </CardBody>
+      </Card>
 
       <Card>
         <CardHeader>

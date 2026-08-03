@@ -15,3 +15,17 @@ export async function getTrialsExpiring(days = 7): Promise<TrialExpiring[]> {
   const { data } = await apiClient.get<TrialExpiring[]>('/v1/admin/analytics/trials-expiring', { params: { days } });
   return data;
 }
+
+export interface ActivityEvent {
+  type: string;
+  at: string;
+  title: string;
+  subtitle: string | null;
+  href: string;
+  tone: 'info' | 'success' | 'warning' | 'danger';
+}
+
+export async function getActivity(): Promise<{ items: ActivityEvent[] }> {
+  const { data } = await apiClient.get<{ items: ActivityEvent[] }>('/v1/admin/analytics/activity');
+  return data;
+}
