@@ -10,6 +10,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { to: '/', label: 'Dashboard', permission: 'analytics:view' },
+  { to: '/notifications', label: 'Alerts', permission: 'analytics:view' },
   { to: '/organisations', label: 'Organisations', permission: 'organisations:view' },
   { to: '/customer-users', label: 'Customer Users', permission: 'customer_users:view' },
   { to: '/announcements', label: 'Announcements', permission: 'support:view' },

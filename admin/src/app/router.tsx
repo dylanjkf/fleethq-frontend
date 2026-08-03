@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router';
 import { ProtectedRoute } from '@/app/ProtectedRoute';
 import { LoginPage } from '@/features/auth/LoginPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
+import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { OrganisationsListPage } from '@/features/organisations/OrganisationsListPage';
 import { NewCustomerLoginPage } from '@/features/organisations/NewCustomerLoginPage';
 import { OrganisationDetailPage } from '@/features/organisations/OrganisationDetailPage';
@@ -28,6 +29,7 @@ export const router = createBrowserRouter(
       element: <ProtectedRoute />,
       children: [
         { path: '/', element: <DashboardPage /> },
+        { path: '/notifications', element: <NotificationsPage /> },
         { path: '/organisations', element: <OrganisationsListPage /> },
         { path: '/organisations/new', element: <NewCustomerLoginPage /> },
         { path: '/organisations/:id', element: <OrganisationDetailPage /> },
