@@ -6,6 +6,8 @@ export interface FleetSearchParams {
   pageSize?: number;
   search?: string;
   includeArchived?: boolean;
+  /** Scope assets/operators to one organisation (used by the company-detail tabs). */
+  companyId?: string;
 }
 
 export async function searchAssets(params: FleetSearchParams): Promise<Paginated<FleetAsset>> {
