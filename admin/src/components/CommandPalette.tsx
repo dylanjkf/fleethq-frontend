@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { globalSearch } from '@/api/search';
 import { useAuth } from '@/hooks/useAuth';
+import { useModalDialog } from '@/hooks/useModalDialog';
 
 /** Nav destinations reachable from the palette, each with the permission that reveals it. */
 const DESTINATIONS: { label: string; to: string; permission?: string }[] = [
@@ -37,6 +38,9 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const { hasPermission } = useAuth();
   const [q, setQ] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  // Shared accessible-modal behaviour (focus trap, Escape-anywhere, focus
+  // restore) instead of the previous input-only Escape and no trap (Round 3).
+  const dialogRef = useModalDialog<HTMLDivElement>(onClose);
   const debouncedQ = useDebounced(q, 200);
 
   useEffect(() => {
@@ -69,18 +73,19 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 pt-24" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="w-full max-w-xl overflow-hidden rounded-xl border border-(--border-subtle) bg-(--surface-1) shadow-2xl"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
+        aria-label="Command palette — search organisations, users, and assets, or jump to a page"
+        tabIndex={-1}
       >
         <input
           ref={inputRef}
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Escape') onClose();
-          }}
+          aria-label="Search organisations, users, assets, or jump to a page"
           placeholder="Search organisations, users, assets… or jump to a page"
           className="w-full border-b border-(--border-subtle) bg-transparent px-5 py-4 text-sm outline-none placeholder:text-(--text-tertiary)"
         />
@@ -125,9 +130,24 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
             </Section>
           )}
 
-          {destinations.length === 0 && !results?.companies.length && !results?.users.length && !results?.assets.length && (
-            <p className="px-3 py-6 text-center text-(--text-tertiary)">No matches.</p>
-          )}
+          {destinations.length === 0 &&
+            !results?.companies.length &&
+            !results?.users.length &&
+            !results?.assets.length &&
+            // Distinguish searching / failed / genuinely-empty instead of always
+            // claiming "No matches" (Round 3): a slow or failed search read no
+            // longer reads as "nothing found".
+            (searchQuery.isFetching ? (
+              <p className="px-3 py-6 text-center text-(--text-tertiary)" role="status">
+                Searching…
+              </p>
+            ) : searchQuery.isError ? (
+              <p className="px-3 py-6 text-center text-danger-400" role="alert">
+                Search failed — try again.
+              </p>
+            ) : (
+              <p className="px-3 py-6 text-center text-(--text-tertiary)">No matches.</p>
+            ))}
         </div>
       </div>
     </div>

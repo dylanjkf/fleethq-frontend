@@ -28,6 +28,12 @@ export interface AdminMe {
   mustResetPassword: boolean;
   role: { id: string; name: string };
   permissions: string[];
+  /**
+   * Account-setup steps the server will force before it honours any permission
+   * (the admin-permission guard returns ADMIN_SETUP_REQUIRED until they clear).
+   * The SPA must present a blocking setup screen while either is true.
+   */
+  obligations: { passwordReset: boolean; mfaEnrollment: boolean };
 }
 
 export interface AdminSessionSummary {

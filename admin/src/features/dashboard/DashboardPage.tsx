@@ -89,7 +89,13 @@ export function DashboardPage() {
           <CardHeader>
             <h2 className="text-sm font-semibold">Signups, last 30 days</h2>
           </CardHeader>
-          <CardBody>{signupsQuery.data && <SignupsChart data={signupsQuery.data} />}</CardBody>
+          <CardBody>
+            {signupsQuery.isError ? (
+              <ErrorState message="Could not load signups." />
+            ) : (
+              signupsQuery.data && <SignupsChart data={signupsQuery.data} />
+            )}
+          </CardBody>
         </Card>
 
         <Card>
@@ -97,7 +103,11 @@ export function DashboardPage() {
             <h2 className="text-sm font-semibold">Trials expiring within 7 days</h2>
           </CardHeader>
           <CardBody className="!px-0 !py-0">
-            {trialsQuery.data?.length ? (
+            {trialsQuery.isError ? (
+              <div className="px-5 py-4">
+                <ErrorState message="Could not load expiring trials." />
+              </div>
+            ) : trialsQuery.data?.length ? (
               <ul className="divide-y divide-(--border-subtle)">
                 {trialsQuery.data.map((t) => (
                   <li key={t.id} className="flex items-center justify-between px-5 py-3 text-sm">
@@ -120,7 +130,11 @@ export function DashboardPage() {
           <h2 className="text-sm font-semibold">Live activity</h2>
         </CardHeader>
         <CardBody className="!px-0 !py-0">
-          {activityQuery.data?.items.length ? (
+          {activityQuery.isError ? (
+            <div className="px-5 py-4">
+              <ErrorState message="Could not load recent activity." />
+            </div>
+          ) : activityQuery.data?.items.length ? (
             <ul className="divide-y divide-(--border-subtle)">
               {activityQuery.data.items.map((e, idx) => (
                 <li key={`${e.type}-${idx}`} className="flex items-center justify-between px-5 py-3 text-sm">

@@ -31,8 +31,8 @@ export function OrganisationDetailPage() {
 
   const tabs: { key: TabKey; label: string; visible: boolean }[] = [
     { key: 'overview', label: 'Overview', visible: true },
-    { key: 'vehicles', label: 'Vehicles', visible: hasPermission('fleet:view') },
-    { key: 'drivers', label: 'Drivers', visible: hasPermission('fleet:view') },
+    { key: 'vehicles', label: 'Assets', visible: hasPermission('fleet:view') },
+    { key: 'drivers', label: 'Operators', visible: hasPermission('fleet:view') },
     { key: 'inspections', label: 'Inspections', visible: hasPermission('inspections:view') },
     { key: 'maintenance', label: 'Defects', visible: hasPermission('maintenance:view') },
     { key: 'billing', label: 'Billing', visible: hasPermission('billing:view') },

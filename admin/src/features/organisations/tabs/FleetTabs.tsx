@@ -9,7 +9,7 @@ import { ApiClientError } from '@/api/client';
 
 const PAGE_SIZE = 15;
 
-/** Vehicles registered to this organisation (the cross-tenant fleet endpoint scoped by companyId). */
+/** Assets registered to this organisation (the cross-tenant fleet endpoint scoped by companyId). */
 export function VehiclesTab({ companyId }: { companyId: string }) {
   const [page, setPage] = useState(1);
   const query = useQuery({
@@ -18,8 +18,8 @@ export function VehiclesTab({ companyId }: { companyId: string }) {
   });
 
   if (query.isLoading) return <PageSpinner />;
-  if (query.isError) return <ErrorState message={query.error instanceof ApiClientError ? query.error.message : 'Could not load vehicles.'} />;
-  if (query.data!.items.length === 0) return <EmptyState title="No vehicles" description="This organisation has no assets recorded." />;
+  if (query.isError) return <ErrorState message={query.error instanceof ApiClientError ? query.error.message : 'Could not load assets.'} />;
+  if (query.data!.items.length === 0) return <EmptyState title="No assets" description="This organisation has no assets recorded." />;
 
   return (
     <Card>
@@ -46,7 +46,7 @@ export function VehiclesTab({ companyId }: { companyId: string }) {
   );
 }
 
-/** Drivers/operators belonging to this organisation. */
+/** Operators belonging to this organisation. */
 export function DriversTab({ companyId }: { companyId: string }) {
   const [page, setPage] = useState(1);
   const query = useQuery({
@@ -55,8 +55,8 @@ export function DriversTab({ companyId }: { companyId: string }) {
   });
 
   if (query.isLoading) return <PageSpinner />;
-  if (query.isError) return <ErrorState message={query.error instanceof ApiClientError ? query.error.message : 'Could not load drivers.'} />;
-  if (query.data!.items.length === 0) return <EmptyState title="No drivers" description="This organisation has no operators recorded." />;
+  if (query.isError) return <ErrorState message={query.error instanceof ApiClientError ? query.error.message : 'Could not load operators.'} />;
+  if (query.data!.items.length === 0) return <EmptyState title="No operators" description="This organisation has no operators recorded." />;
 
   return (
     <Card>

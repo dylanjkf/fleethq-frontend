@@ -32,6 +32,7 @@ export function CustomerUsersPage() {
 
       <Input
         placeholder="Search by email…"
+        aria-label="Search customer users by email"
         className="max-w-sm"
         value={email}
         onChange={(e) => {
