@@ -47,6 +47,7 @@ export function OrganisationsListPage() {
       <div className="flex gap-3">
         <Input
           placeholder="Search by name…"
+          aria-label="Search organisations by name"
           className="max-w-xs"
           value={search}
           onChange={(e) => {

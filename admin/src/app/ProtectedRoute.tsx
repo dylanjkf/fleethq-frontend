@@ -3,6 +3,7 @@ import { Navigate, Outlet } from 'react-router';
 import { useAuth } from '@/hooks/useAuth';
 import { PageSpinner } from '@/components/ui/Spinner';
 import { AppShell } from '@/app/AppShell';
+import { AccountSetupGate } from '@/features/auth/AccountSetupGate';
 
 export function ProtectedRoute() {
   const { status } = useAuth();
@@ -10,10 +11,15 @@ export function ProtectedRoute() {
   if (status === 'loading') return <PageSpinner />;
   if (status === 'unauthenticated') return <Navigate to="/login" replace />;
 
+  // AccountSetupGate short-circuits to a blocking setup screen while the signed-in
+  // admin still owes a password reset or MFA enrolment (the server would 403 every
+  // permissioned request until then); otherwise it renders the console as usual.
   return (
-    <AppShell>
-      <Outlet />
-    </AppShell>
+    <AccountSetupGate>
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </AccountSetupGate>
   );
 }
 

@@ -103,7 +103,11 @@ export function BillingOverviewPage() {
           <h2 className="text-sm font-semibold">Trials ending within 30 days</h2>
         </CardHeader>
         <CardBody className="!px-0 !py-0">
-          {trialsQuery.data?.length ? (
+          {trialsQuery.isError ? (
+            <div className="px-5 py-4">
+              <ErrorState message="Could not load expiring trials." />
+            </div>
+          ) : trialsQuery.data?.length ? (
             <ul className="divide-y divide-(--border-subtle)">
               {trialsQuery.data.map((t) => (
                 <li key={t.id} className="flex items-center justify-between px-5 py-3 text-sm">

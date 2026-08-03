@@ -16,6 +16,16 @@ export async function getMe(): Promise<AdminMe> {
   return data;
 }
 
+/**
+ * Change the signed-in admin's own password. The server bumps tokenVersion (so
+ * every other session is revoked) and returns a fresh access token the caller
+ * must store in place of the old one.
+ */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<{ accessToken: string }> {
+  const { data } = await apiClient.post<{ accessToken: string }>('/v1/admin/auth/change-password', { currentPassword, newPassword });
+  return data;
+}
+
 export async function listSessions(): Promise<AdminSessionSummary[]> {
   const { data } = await apiClient.get<AdminSessionSummary[]>('/v1/admin/auth/sessions');
   return data;

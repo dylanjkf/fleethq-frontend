@@ -146,6 +146,7 @@ export function AdminUsersPage() {
       <div className="flex items-center gap-3">
         <Input
           placeholder="Search by name, email, username…"
+          aria-label="Search staff accounts by name, email, or username"
           className="max-w-xs"
           value={search}
           onChange={(e) => {
