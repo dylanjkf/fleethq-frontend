@@ -16,6 +16,7 @@ import { InspectionDetailPage } from '@/features/inspections/InspectionDetailPag
 import { MaintenancePage } from '@/features/maintenance/MaintenancePage';
 import { MaintenanceDetailPage } from '@/features/maintenance/MaintenanceDetailPage';
 import { AdminUsersPage } from '@/features/admin-users/AdminUsersPage';
+import { SecurityPage } from '@/features/security/SecurityPage';
 import { AuditLogPage } from '@/features/audit-log/AuditLogPage';
 import { SettingsPage } from '@/features/settings/SettingsPage';
 import { NotFoundPage } from '@/features/shared/NotFoundPage';
@@ -41,6 +42,7 @@ export const router = createBrowserRouter(
         { path: '/maintenance', element: <MaintenancePage /> },
         { path: '/maintenance/:id', element: <MaintenanceDetailPage /> },
         { path: '/admin-users', element: <AdminUsersPage /> },
+        { path: '/security', element: <SecurityPage /> },
         { path: '/audit-log', element: <AuditLogPage /> },
         { path: '/settings', element: <SettingsPage /> },
         { path: '*', element: <NotFoundPage /> },

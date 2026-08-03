@@ -19,6 +19,7 @@ const NAV_ITEMS: NavItem[] = [
   { to: '/maintenance', label: 'Defects', permission: 'maintenance:view' },
   { to: '/system', label: 'System Health', permission: 'system:view' },
   { to: '/admin-users', label: 'Staff Accounts', permission: 'admin_users:view' },
+  { to: '/security', label: 'Security', permission: 'security:view' },
   { to: '/audit-log', label: 'Audit Log', permission: 'audit_log:view' },
 ];
 
