@@ -11,10 +11,10 @@ import { OverviewTab } from './tabs/OverviewTab';
 import { BillingTab } from './tabs/BillingTab';
 import { NotesTab } from './tabs/NotesTab';
 import { FeatureFlagsTab } from './tabs/FeatureFlagsTab';
-import { VehiclesTab, DriversTab } from './tabs/FleetTabs';
+import { AssetsTab, OperatorsTab } from './tabs/FleetTabs';
 import { OrgInspectionsTab, OrgMaintenanceTab } from './tabs/OpsTabs';
 
-type TabKey = 'overview' | 'vehicles' | 'drivers' | 'inspections' | 'maintenance' | 'billing' | 'notes' | 'feature-flags';
+type TabKey = 'overview' | 'assets' | 'operators' | 'inspections' | 'maintenance' | 'billing' | 'notes' | 'feature-flags';
 
 export function OrganisationDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -31,8 +31,8 @@ export function OrganisationDetailPage() {
 
   const tabs: { key: TabKey; label: string; visible: boolean }[] = [
     { key: 'overview', label: 'Overview', visible: true },
-    { key: 'vehicles', label: 'Assets', visible: hasPermission('fleet:view') },
-    { key: 'drivers', label: 'Operators', visible: hasPermission('fleet:view') },
+    { key: 'assets', label: 'Assets', visible: hasPermission('fleet:view') },
+    { key: 'operators', label: 'Operators', visible: hasPermission('fleet:view') },
     { key: 'inspections', label: 'Inspections', visible: hasPermission('inspections:view') },
     { key: 'maintenance', label: 'Defects', visible: hasPermission('maintenance:view') },
     { key: 'billing', label: 'Billing', visible: hasPermission('billing:view') },
@@ -68,8 +68,8 @@ export function OrganisationDetailPage() {
       </div>
 
       {tab === 'overview' && <OverviewTab org={org} />}
-      {tab === 'vehicles' && hasPermission('fleet:view') && <VehiclesTab companyId={org.id} />}
-      {tab === 'drivers' && hasPermission('fleet:view') && <DriversTab companyId={org.id} />}
+      {tab === 'assets' && hasPermission('fleet:view') && <AssetsTab companyId={org.id} />}
+      {tab === 'operators' && hasPermission('fleet:view') && <OperatorsTab companyId={org.id} />}
       {tab === 'inspections' && hasPermission('inspections:view') && <OrgInspectionsTab companyId={org.id} />}
       {tab === 'maintenance' && hasPermission('maintenance:view') && <OrgMaintenanceTab companyId={org.id} />}
       {tab === 'billing' && hasPermission('billing:view') && <BillingTab companyId={org.id} />}
