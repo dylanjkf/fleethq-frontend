@@ -53,6 +53,11 @@ export async function disableMfa(code: string): Promise<void> {
   await apiClient.post('/v1/admin/auth/mfa/disable', { code });
 }
 
+export async function regenerateBackupCodes(code: string): Promise<{ backupCodes: string[] }> {
+  const { data } = await apiClient.post<{ backupCodes: string[] }>('/v1/admin/auth/mfa/backup-codes/regenerate', { code });
+  return data;
+}
+
 /** A device fingerprint generated once per browser and persisted — lets a trusted device skip the MFA challenge. */
 export function getOrCreateDeviceFingerprint(): string {
   const KEY = 'fleethq-admin.deviceFingerprint';
