@@ -28,6 +28,13 @@ export interface AuthContextValue {
   confirmPolicyMfaSetup: (setupToken: string, code: string) => Promise<LoginResult & { backupCodes: string[] }>;
   /** Set a new password after a login was blocked by password_expired, and finish that login. */
   changeExpiredPassword: (changeToken: string, newPassword: string) => Promise<LoginResult>;
+  /**
+   * Establish a session directly from a server-issued access token — used by the
+   * self-serve signup success page, which polls until the payment webhook has
+   * provisioned the account and returns a token, then logs the new admin in the
+   * exact same way a normal login does (store token → load current user).
+   */
+  loginWithToken: (accessToken: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -143,6 +150,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return result;
   }, [loadCurrentUser]);
 
+  const loginWithToken = useCallback(async (accessToken: string) => {
+    tokenStore.set(accessToken);
+    await loadCurrentUser();
+  }, [loadCurrentUser]);
+
   const logout = useCallback(() => {
     // Best-effort — revoke the session server-side, but a slow/failed request
     // must never block the local sign-out.
@@ -161,11 +173,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = useMemo<AuthContextValue>(
     () => ({
       status, user, can, login, selectCompany, verifyMfa, loginWithMagicLink, loginWithOAuth, loginWithPasskey,
-      confirmPolicyMfaSetup, changeExpiredPassword, logout,
+      confirmPolicyMfaSetup, changeExpiredPassword, loginWithToken, logout,
     }),
     [
       status, user, can, login, selectCompany, verifyMfa, loginWithMagicLink, loginWithOAuth, loginWithPasskey,
-      confirmPolicyMfaSetup, changeExpiredPassword, logout,
+      confirmPolicyMfaSetup, changeExpiredPassword, loginWithToken, logout,
     ],
   );
 

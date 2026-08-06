@@ -3,6 +3,8 @@ import { AppShell } from '@/components/layout/AppShell';
 import { ProtectedRoute } from '@/app/ProtectedRoute';
 // Auth + shell stay eager — they're on the critical first-paint / login path.
 import { LoginPage } from '@/features/auth/LoginPage';
+import { SignupPage } from '@/features/auth/SignupPage';
+import { SignupCompletePage } from '@/features/auth/SignupCompletePage';
 import { ContactPage } from '@/features/auth/ContactPage';
 import { ForgotPasswordPage, MagicLinkPage, OAuthCallbackPage, ResetPasswordPage, VerifyEmailPage } from '@/features/auth/AuthActionPages';
 import { NotFoundPage } from '@/features/shared/NotFoundPage';
@@ -25,6 +27,8 @@ import {
  */
 export const routes: RouteObject[] = [
   { path: '/login', element: <LoginPage /> },
+  { path: '/signup', element: <SignupPage /> },
+  { path: '/signup/complete', element: <SignupCompletePage /> },
   { path: '/contact', element: <ContactPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },

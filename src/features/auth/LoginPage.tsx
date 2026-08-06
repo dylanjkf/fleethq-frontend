@@ -530,8 +530,12 @@ export function LoginPage() {
               <Separator />
               <p className="text-center text-sm text-(--text-tertiary)">
                 New to FleetHQ?{' '}
+                <Link to="/signup" className="text-accent-600 hover:underline">
+                  Create an account
+                </Link>{' '}
+                or{' '}
                 <Link to="/contact" className="text-accent-600 hover:underline">
-                  Get in touch
+                  get in touch
                 </Link>
               </p>
             </div>
