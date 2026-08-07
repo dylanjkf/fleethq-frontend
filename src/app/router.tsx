@@ -6,6 +6,7 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { SignupPage } from '@/features/auth/SignupPage';
 import { SignupCompletePage } from '@/features/auth/SignupCompletePage';
 import { ContactPage } from '@/features/auth/ContactPage';
+import { TermsPage, PrivacyPage } from '@/features/auth/LegalPages';
 import { ForgotPasswordPage, MagicLinkPage, OAuthCallbackPage, ResetPasswordPage, VerifyEmailPage } from '@/features/auth/AuthActionPages';
 import { NotFoundPage } from '@/features/shared/NotFoundPage';
 // Feature pages are code-split (React.lazy, in ./lazyPages) — each route ships
@@ -30,6 +31,8 @@ export const routes: RouteObject[] = [
   { path: '/signup', element: <SignupPage /> },
   { path: '/signup/complete', element: <SignupCompletePage /> },
   { path: '/contact', element: <ContactPage /> },
+  { path: '/terms', element: <TermsPage /> },
+  { path: '/privacy', element: <PrivacyPage /> },
   { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/reset-password', element: <ResetPasswordPage /> },
   { path: '/verify-email', element: <VerifyEmailPage /> },

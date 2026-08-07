@@ -1,5 +1,5 @@
 import path from 'node:path';
-import { defineConfig } from 'vitest/config';
+import { defineConfig, configDefaults } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import basicSsl from '@vitejs/plugin-basic-ssl';
@@ -50,5 +50,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: './src/test/setup.ts',
+    // The `admin/` sub-app is a separate Vite project with its own config and
+    // `@` alias (admin/src). Without this exclude the root runner sweeps its
+    // specs under the root alias and they fail to resolve — run them with
+    // `npm --prefix admin test` instead.
+    exclude: [...configDefaults.exclude, 'admin/**'],
   },
 });

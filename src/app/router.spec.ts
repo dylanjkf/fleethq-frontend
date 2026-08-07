@@ -48,7 +48,16 @@ describe('route table', () => {
     // session. Every path except the auth pages must be nested inside a layout.
     const publicPaths = routes.filter((r) => r.path).map((r) => r.path);
     expect(publicPaths.sort()).toEqual(
-      ['/contact', '/forgot-password', '/login', '/magic-link', '/oauth-callback', '/reset-password', '/signup', '/signup/complete', '/verify-email'].sort(),
+      ['/contact', '/forgot-password', '/login', '/magic-link', '/oauth-callback', '/privacy', '/reset-password', '/signup', '/signup/complete', '/terms', '/verify-email'].sort(),
     );
+  });
+
+  it('has public routes for the legal links the signup consent checkbox points at', () => {
+    // The signup form makes the user accept the Terms of Service and Privacy
+    // Policy and links to /terms and /privacy — those links must resolve, or the
+    // customer is asked to accept terms they can't open (a 404). Regression guard.
+    for (const path of ['/terms', '/privacy']) {
+      expect(declaredPaths).toContain(path);
+    }
   });
 });
