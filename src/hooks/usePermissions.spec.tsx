@@ -47,6 +47,7 @@ function withAuth(granted: Set<string>, children: React.ReactNode) {
     changeExpiredPassword: async () => {
       throw new Error('not implemented in test');
     },
+    loginWithToken: async () => {},
     logout: () => {},
   };
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

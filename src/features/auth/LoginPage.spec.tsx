@@ -31,6 +31,7 @@ function renderWithAuth(overrides: Partial<AuthContextValue> = {}) {
     loginWithPasskey: vi.fn(),
     confirmPolicyMfaSetup: vi.fn(),
     changeExpiredPassword: vi.fn(),
+    loginWithToken: vi.fn(),
     logout: vi.fn(),
     ...overrides,
   };
