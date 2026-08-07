@@ -44,7 +44,26 @@ export function registerServiceWorker(): void {
   // notification tap is an infrequent, intentional context switch.
   navigator.serviceWorker.addEventListener('message', (event) => {
     if (event.data?.type === 'navigate' && typeof event.data.path === 'string') {
-      window.location.assign(event.data.path);
+      const target = toSameOriginPath(event.data.path);
+      if (target) window.location.assign(target);
     }
   });
+}
+
+/**
+ * Defence-in-depth (security audit, Low): the notification `path` is currently
+ * always a hardcoded server-side literal, but resolve it and confirm it stays
+ * on this origin before navigating, so an open-redirect can't be introduced if
+ * that path ever becomes dynamic. Returns the same-origin path (path+search+
+ * hash) to navigate to, or null to ignore anything absolute/cross-origin or
+ * malformed (`javascript:`, `//evil.example`, `https://evil.example`, ...).
+ */
+function toSameOriginPath(rawPath: string): string | null {
+  try {
+    const resolved = new URL(rawPath, window.location.origin);
+    if (resolved.origin !== window.location.origin) return null;
+    return `${resolved.pathname}${resolved.search}${resolved.hash}`;
+  } catch {
+    return null;
+  }
 }
