@@ -289,7 +289,7 @@ export function LoginPage() {
           </h1>
           <p className="mt-4 text-sm leading-relaxed text-white/60">
             Drivers, dispatch, workshop and compliance — one connected platform for
-            transport, logistics, mining and construction operators.
+            transport and logistics operators.
           </p>
         </div>
 
