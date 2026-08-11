@@ -2,6 +2,7 @@ import { createContext, useCallback, useEffect, useMemo, useState, type ReactNod
 import * as authApi from '@/api/auth';
 import { setUnauthorizedHandler } from '@/api/client';
 import { tokenStore } from '@/api/token-store';
+import { queryClient } from '@/app/query-client';
 import type { AdminLoginResult, AdminMe } from '@/api/types';
 
 export type AuthStatus = 'loading' | 'authenticated' | 'unauthenticated';
@@ -45,6 +46,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     setUnauthorizedHandler(() => {
+      // Drop every cached query so a 401 (session expired / revoked) can't leave
+      // one staff member's fetched data (customer, billing) visible to whoever
+      // signs in next on a shared machine.
+      queryClient.clear();
       setAdmin(null);
       setStatus('unauthenticated');
     });
@@ -78,6 +83,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await authApi.logout();
     } finally {
+      // Clear the React Query cache on the way out — without this the next staff
+      // member to sign in on a shared/kiosk machine can briefly see the previous
+      // user's cached customer/billing data before their own fetches land.
+      queryClient.clear();
       tokenStore.clear();
       setAdmin(null);
       setStatus('unauthenticated');
