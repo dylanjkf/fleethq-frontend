@@ -74,3 +74,5 @@ export const BillingPage = lazyWithRetry('BillingPage', () => import('@/features
 export const ProfilePage = lazyWithRetry('ProfilePage', () => import('@/features/profile/ProfilePage').then((m) => ({ default: m.ProfilePage })));
 export const SettingsPage = lazyWithRetry('SettingsPage', () => import('@/features/settings/SettingsPage').then((m) => ({ default: m.SettingsPage })));
 export const IntegrationsPage = lazyWithRetry('IntegrationsPage', () => import('@/features/integrations/IntegrationsPage').then((m) => ({ default: m.IntegrationsPage })));
+export const WarehousePage = lazyWithRetry('WarehousePage', () => import('@/features/warehouse/WarehousePage').then((m) => ({ default: m.WarehousePage })));
+export const AIPage = lazyWithRetry('AIPage', () => import('@/features/ai/AIPage').then((m) => ({ default: m.AIPage })));

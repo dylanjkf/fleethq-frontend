@@ -2,6 +2,7 @@ import {
   BarChart3,
   BookOpen,
   BookUser,
+  Boxes,
   Building2,
   Cable,
   ClipboardCheck,
@@ -15,6 +16,7 @@ import {
   ScrollText,
   Settings,
   ShieldCheck,
+  Sparkles,
   TrendingUp,
   Truck,
   Users,
@@ -122,6 +124,18 @@ export const NAV_ITEMS: NavItem[] = [
     status: 'active',
   },
   {
+    // Paid add-on: the page itself renders an upgrade prompt when the company
+    // lacks the 'warehouse' entitlement (data entry is never gated — see
+    // WarehousePage). The nav entry is permission-gated so operators without
+    // warehouse access don't see a dead link.
+    label: 'Warehouse',
+    path: '/warehouse',
+    icon: Boxes,
+    group: 'Fleet',
+    permissions: [PERMISSIONS.WAREHOUSE_VIEW],
+    status: 'active',
+  },
+  {
     label: 'Compliance',
     path: '/compliance',
     icon: ShieldCheck,
@@ -183,6 +197,17 @@ export const NAV_ITEMS: NavItem[] = [
     icon: TrendingUp,
     group: 'Insights',
     permissions: [PERMISSIONS.REPORTS_VIEW],
+    status: 'active',
+  },
+  {
+    // Fleet Intelligence hub — predictive maintenance, asset recommendations,
+    // fatigue signals. Each section inside AIPage is itself permission-gated;
+    // the nav entry shows for anyone who can see at least one of those sources.
+    label: 'Intelligence',
+    path: '/ai',
+    icon: Sparkles,
+    group: 'Insights',
+    permissions: [PERMISSIONS.MAINTENANCE_VIEW, PERMISSIONS.COMPLIANCE_VIEW],
     status: 'active',
   },
   {
