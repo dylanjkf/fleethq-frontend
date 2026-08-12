@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { ProtectedRoute } from '@/app/ProtectedRoute';
 import { LoginPage } from '@/features/auth/LoginPage';
+import { ForgotPasswordPage, ResetPasswordPage } from '@/features/auth/AuthActionPages';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { NotificationsPage } from '@/features/notifications/NotificationsPage';
 import { OrganisationsListPage } from '@/features/organisations/OrganisationsListPage';
@@ -27,6 +28,10 @@ import { NotFoundPage } from '@/features/shared/NotFoundPage';
 export const router = createBrowserRouter(
   [
     { path: '/login', element: <LoginPage /> },
+    // Public (outside ProtectedRoute) — reached from a signed-out state or an
+    // emailed link, so they must not require an existing session.
+    { path: '/forgot-password', element: <ForgotPasswordPage /> },
+    { path: '/reset-password', element: <ResetPasswordPage /> },
     {
       element: <ProtectedRoute />,
       children: [
