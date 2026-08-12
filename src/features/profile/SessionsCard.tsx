@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ErrorState } from '@/components/ui/error-state';
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table';
 import { describeApiError } from '@/lib/errors';
+import { toast } from '@/hooks/use-toast';
 import * as authApi from '@/api/auth';
 
 /** Self-service device/session management — mirrors the FleetHQ admin platform's own SessionsCard. */
@@ -14,6 +15,8 @@ export function SessionsCard() {
   const revokeMutation = useMutation({
     mutationFn: (sessionId: string) => authApi.revokeSession(sessionId),
     onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['auth-sessions'] }),
+    onError: (err) =>
+      toast({ title: "Couldn't revoke session", description: describeApiError(err), variant: 'destructive' }),
   });
 
   return (

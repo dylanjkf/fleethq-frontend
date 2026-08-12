@@ -145,6 +145,7 @@ export function MessagesPage() {
             operators.map((op) => (
               <button
                 key={op.id}
+                type="button"
                 onClick={() => setSelected(op)}
                 className={`rounded-md px-3 py-2 text-left text-sm transition-colors ${
                   selected?.id === op.id

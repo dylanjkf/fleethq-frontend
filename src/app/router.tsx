@@ -16,7 +16,7 @@ import {
   DashboardPage, FleetPage, AssetDetailPage, AttachedUnitDetailPage, OperatorsListPage, DispatchPage, CustomersPage, DepotsPage,
   MaintenancePage, CompliancePage, ChecklistsPage, FormsPage, MessagesPage, ReportsPage, ImpactPage,
   DocumentsPage, KnowledgeBasePage, FuelPage, AdministrationPage, AuditLogPage, BillingPage,
-  ProfilePage, SettingsPage, IntegrationsPage,
+  ProfilePage, SettingsPage, IntegrationsPage, WarehousePage, AIPage,
 } from '@/app/lazyPages';
 
 /**
@@ -50,6 +50,7 @@ export const routes: RouteObject[] = [
           { path: '/attached-units/:attachedUnitId', element: <AttachedUnitDetailPage /> },
           { path: '/operators', element: <OperatorsListPage /> },
           { path: '/maintenance', element: <MaintenancePage /> },
+          { path: '/warehouse', element: <WarehousePage /> },
           { path: '/dispatch', element: <DispatchPage /> },
           { path: '/fuel', element: <FuelPage /> },
           { path: '/customers', element: <CustomersPage /> },
@@ -62,6 +63,7 @@ export const routes: RouteObject[] = [
           { path: '/knowledge-base', element: <KnowledgeBasePage /> },
           { path: '/reports', element: <ReportsPage /> },
           { path: '/impact', element: <ImpactPage /> },
+          { path: '/ai', element: <AIPage /> },
           { path: '/integrations', element: <IntegrationsPage /> },
           { path: '/administration', element: <AdministrationPage /> },
           { path: '/audit-log', element: <AuditLogPage /> },

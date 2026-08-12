@@ -81,7 +81,7 @@ export function NotificationsBell() {
         <div className="flex items-center justify-between px-2 py-1.5">
           <DropdownMenuLabel className="p-0">Notifications</DropdownMenuLabel>
           {unread > 0 && (
-            <button className="text-xs font-medium text-accent-500" onClick={() => readAll.mutate()}>
+            <button type="button" className="text-xs font-medium text-accent-500" onClick={() => readAll.mutate()}>
               Mark all read
             </button>
           )}
@@ -94,6 +94,7 @@ export function NotificationsBell() {
             {items.map((n) => (
               <button
                 key={n.id}
+                type="button"
                 onClick={() => {
                   if (!n.readAt) readOne.mutate(n.id);
                   if (n.linkPath) navigate(n.linkPath);

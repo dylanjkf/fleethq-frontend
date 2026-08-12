@@ -85,6 +85,7 @@ export function Topbar() {
           <DropdownMenuTrigger asChild>
             <button
               type="button"
+              aria-label="Open account menu"
               className="rounded-full ring-offset-2 ring-offset-(--surface-0) transition-shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-500"
             >
               <Avatar>

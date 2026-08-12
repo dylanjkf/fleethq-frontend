@@ -21,6 +21,7 @@ interface ImportStockDialogProps {
 export function ImportStockDialog({ open, onOpenChange, onImport, isImporting }: ImportStockDialogProps) {
   const [text, setText] = useState('');
   const [result, setResult] = useState<ImportResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   function parse(): StockInput[] {
     const lines = text
@@ -43,16 +44,26 @@ export function ImportStockDialog({ open, onOpenChange, onImport, isImporting }:
 
   async function run() {
     if (!rows.length) return;
-    const res = await onImport(rows);
-    setResult(res);
-    if (res.failed === 0) setText('');
+    setError(null);
+    try {
+      const res = await onImport(rows);
+      setResult(res);
+      if (res.failed === 0) setText('');
+    } catch (err) {
+      // Without this the whole import could fail (network / server error) and
+      // the dialog would sit silent — no result, no feedback. Surface it.
+      setError(err instanceof Error ? err.message : 'Import failed. Please try again.');
+    }
   }
 
   return (
     <Dialog
       open={open}
       onOpenChange={(o) => {
-        if (!o) setResult(null);
+        if (!o) {
+          setResult(null);
+          setError(null);
+        }
         onOpenChange(o);
       }}
     >
@@ -79,6 +90,9 @@ export function ImportStockDialog({ open, onOpenChange, onImport, isImporting }:
           </div>
           {rows.length > 0 && !result && (
             <p className="text-xs text-(--text-tertiary)">{rows.length} row{rows.length === 1 ? '' : 's'} ready to import.</p>
+          )}
+          {error && (
+            <p className="rounded-md border border-danger-500/40 bg-danger-500/10 p-2 text-xs text-danger-500">{error}</p>
           )}
           {result && (
             <div className="rounded-md border border-(--border-subtle) p-3 text-sm">
