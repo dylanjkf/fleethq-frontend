@@ -25,7 +25,11 @@ export function PasskeysCard() {
   const query = useQuery({ queryKey: ['auth-passkeys'], queryFn: authApi.listPasskeys });
   const removeMutation = useMutation({
     mutationFn: (id: string) => authApi.removePasskey(id),
-    onSuccess: () => void queryClient.invalidateQueries({ queryKey: ['auth-passkeys'] }),
+    onSuccess: () => {
+      setError(null);
+      void queryClient.invalidateQueries({ queryKey: ['auth-passkeys'] });
+    },
+    onError: (err) => setError(err instanceof ApiClientError ? err.message : 'Could not remove that passkey.'),
   });
 
   async function addPasskey() {

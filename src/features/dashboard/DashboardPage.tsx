@@ -22,6 +22,7 @@ import { listOperators } from '@/api/operators';
 import { listUsers } from '@/api/users';
 import { useAuth } from '@/hooks/useAuth';
 import { usePermissions } from '@/hooks/usePermissions';
+import { toast } from '@/hooks/use-toast';
 import { PERMISSIONS } from '@/lib/permissions';
 import { CustomizeDashboardDialog } from '@/features/dashboard/CustomizeDashboardDialog';
 
@@ -43,7 +44,12 @@ export function DashboardPage() {
   const usersQuery = useQuery({ queryKey: ['users', 'count'], queryFn: () => listUsers({ pageSize: 1 }), enabled: can(PERMISSIONS.USERS_VIEW) });
   const layoutQuery = useQuery({ queryKey: ['dashboard', 'layout'], queryFn: getMyDashboardLayout });
 
-  const saveM = useMutation({ mutationFn: (widgets: WidgetSlot[]) => setMyDashboardLayout(widgets), onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dashboard', 'layout'] }) });
+  const saveM = useMutation({
+    mutationFn: (widgets: WidgetSlot[]) => setMyDashboardLayout(widgets),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['dashboard', 'layout'] }),
+    onError: (err) =>
+      toast({ title: "Couldn't save dashboard layout", description: err instanceof Error ? err.message : undefined, variant: 'destructive' }),
+  });
 
   // Each widget keyed the same as the backend catalog (dashboard-widgets.ts).
   const nodes: Record<string, ReactNode> = useMemo(
@@ -140,8 +146,13 @@ export function DashboardPage() {
           catalog={layoutQuery.data.catalog}
           isSaving={saveM.isPending}
           onSave={async (widgets) => {
-            await saveM.mutateAsync(widgets);
-            setCustomizing(false);
+            try {
+              await saveM.mutateAsync(widgets);
+              setCustomizing(false);
+            } catch {
+              // saveM.onError already surfaced a toast; keep the dialog open so
+              // the user can retry rather than losing their edits silently.
+            }
           }}
         />
       )}
