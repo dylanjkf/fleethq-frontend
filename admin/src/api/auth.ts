@@ -26,6 +26,26 @@ export async function changePassword(currentPassword: string, newPassword: strin
   return data;
 }
 
+/**
+ * Kick off a staff-admin password reset. The endpoint is deliberately
+ * non-enumerating — it always resolves 200 { ok: true } whether or not the
+ * identifier (username OR email) matches an account, so callers must NOT branch
+ * on the outcome to infer account existence.
+ */
+export async function requestPasswordReset(identifier: string): Promise<void> {
+  await apiClient.post('/v1/admin/auth/forgot-password', { identifier });
+}
+
+/**
+ * Complete a password reset with the raw token from the emailed link. On
+ * failure the server returns a typed code the client-facing errors thrown here
+ * preserve (via ApiClientError.code): INVALID_TOKEN (401), WEAK_PASSWORD (400),
+ * PASSWORD_REUSED (400).
+ */
+export async function resetPassword(token: string, newPassword: string): Promise<void> {
+  await apiClient.post('/v1/admin/auth/reset-password', { token, newPassword });
+}
+
 export async function listSessions(): Promise<AdminSessionSummary[]> {
   const { data } = await apiClient.get<AdminSessionSummary[]>('/v1/admin/auth/sessions');
   return data;

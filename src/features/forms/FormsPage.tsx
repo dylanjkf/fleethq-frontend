@@ -25,6 +25,7 @@ import { usePermissions } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
 import { PERMISSIONS } from '@/lib/permissions';
 import { describeApiError } from '@/lib/errors';
+import { ApiClientError } from '@/api/client';
 
 const TEMPLATES_KEY = ['form-templates', 'list'];
 const SUBMISSIONS_KEY = ['form-submissions', 'list'];
@@ -33,7 +34,20 @@ const TARGET_CONTEXT_LABEL: Record<FormTargetContext, string> = {
   DRIVER: 'DriverOS',
   OFFICE: 'FleetHQ',
   BOTH: 'DriverOS + FleetHQ',
+  DELIVERY: 'Delivery confirmation (POD)',
 };
+
+/**
+ * At most one active DELIVERY (proof-of-delivery) template is allowed per
+ * company; a second create/designate comes back as 409 DELIVERY_TEMPLATE_EXISTS.
+ * Surface that as a plain sentence rather than the raw API message.
+ */
+function describeFormError(err: unknown): string {
+  if (err instanceof ApiClientError && err.code === 'DELIVERY_TEMPLATE_EXISTS') {
+    return 'A delivery-confirmation template already exists — archive it before creating another.';
+  }
+  return describeApiError(err);
+}
 
 /**
  * Universal Forms (01-Product/Universal_Forms.md), office side: build
@@ -63,7 +77,7 @@ export function FormsPage() {
       invalidateTemplates();
       toast({ title: 'Form template created', variant: 'success' });
     },
-    onError: (err) => toast({ title: 'Could not create form', description: describeApiError(err), variant: 'destructive' }),
+    onError: (err) => toast({ title: 'Could not create form', description: describeFormError(err), variant: 'destructive' }),
   });
 
   const updateMutation = useMutation({
@@ -72,7 +86,7 @@ export function FormsPage() {
       invalidateTemplates();
       toast({ title: 'Form template updated', variant: 'success' });
     },
-    onError: (err) => toast({ title: 'Could not update form', description: describeApiError(err), variant: 'destructive' }),
+    onError: (err) => toast({ title: 'Could not update form', description: describeFormError(err), variant: 'destructive' }),
   });
 
   const archiveMutation = useMutation({
@@ -163,8 +177,9 @@ export function FormsPage() {
                     <TableCell className="text-(--text-tertiary)">v{template.version}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        {/* Office staff can fill in a template flagged for FleetHQ (or both apps). */}
-                        {template.targetContext !== 'DRIVER' && can(PERMISSIONS.FORMS_SUBMIT) && (
+                        {/* Office staff can fill in a template flagged for FleetHQ (or both apps).
+                            A DELIVERY (POD) template is captured by the driver at a stop, never here. */}
+                        {(template.targetContext === 'OFFICE' || template.targetContext === 'BOTH') && can(PERMISSIONS.FORMS_SUBMIT) && (
                           <Button variant="secondary" size="sm" onClick={() => setFilling(template)}>
                             Fill in
                           </Button>

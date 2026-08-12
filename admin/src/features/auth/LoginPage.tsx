@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react';
-import { useNavigate } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ErrorState } from '@/components/ui/EmptyState';
@@ -71,6 +71,9 @@ export function LoginPage() {
             <Button type="submit" className="w-full" disabled={isSubmitting}>
               {isSubmitting ? 'Signing in…' : 'Sign in'}
             </Button>
+            <Link to="/forgot-password" className="block text-center text-sm text-(--text-tertiary)">
+              Forgot your password?
+            </Link>
           </form>
         ) : (
           <form onSubmit={handleVerify} className="space-y-3">
