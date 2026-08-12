@@ -355,7 +355,21 @@ export interface ChecklistStatusToday {
   items: ChecklistStatusItem[];
 }
 
-export type FormFieldType = 'text' | 'number' | 'single_select' | 'multi_select' | 'date' | 'asset_ref' | 'operator_ref';
+/** All form field types the backend accepts. `photo`/`signature` capture an
+ *  attachment (image/signature) and are answered as
+ *  `{ contentType, filename, base64 }`, stored server-side as an attachment id. */
+export const FORM_FIELD_TYPES = [
+  'text',
+  'number',
+  'single_select',
+  'multi_select',
+  'date',
+  'asset_ref',
+  'operator_ref',
+  'photo',
+  'signature',
+] as const;
+export type FormFieldType = (typeof FORM_FIELD_TYPES)[number];
 
 export interface FormField {
   id: string;
@@ -367,7 +381,7 @@ export interface FormField {
   showIfValue: string | null;
 }
 
-export type FormTargetContext = 'DRIVER' | 'OFFICE' | 'BOTH';
+export type FormTargetContext = 'DRIVER' | 'OFFICE' | 'BOTH' | 'DELIVERY';
 
 export interface FormTemplate {
   id: string;

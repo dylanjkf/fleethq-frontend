@@ -3,7 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useFieldArray, useForm } from 'react-hook-form';
 import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
 import { z } from 'zod';
-import type { FormField as FormFieldModel, FormTargetContext, FormTemplate } from '@/api/types';
+import { FORM_FIELD_TYPES, type FormField as FormFieldModel, type FormTargetContext, type FormTemplate } from '@/api/types';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { DocumentPicker } from '@/features/documents/DocumentPicker';
 
-const FIELD_TYPES = ['text', 'number', 'single_select', 'multi_select', 'date', 'asset_ref', 'operator_ref'] as const;
+const FIELD_TYPES = FORM_FIELD_TYPES;
 const FIELD_TYPE_LABEL: Record<(typeof FIELD_TYPES)[number], string> = {
   text: 'Text',
   number: 'Number',
@@ -23,6 +23,8 @@ const FIELD_TYPE_LABEL: Record<(typeof FIELD_TYPES)[number], string> = {
   date: 'Date',
   asset_ref: 'Asset reference',
   operator_ref: 'Operator reference',
+  photo: 'Photo',
+  signature: 'Signature',
 };
 const SELECT_TYPES = new Set(['single_select', 'multi_select']);
 const NO_CONDITION = '__none__';
@@ -41,7 +43,7 @@ const fieldSchema = z.object({
 const schema = z.object({
   name: z.string().min(1, 'Required').max(200),
   description: z.string().max(1000).optional(),
-  targetContext: z.enum(['DRIVER', 'OFFICE', 'BOTH']),
+  targetContext: z.enum(['DRIVER', 'OFFICE', 'BOTH', 'DELIVERY']),
   fields: z.array(fieldSchema).min(1, 'Add at least one field'),
   /** Empty string means "none" — kept as a string so the form control stays controlled. */
   referenceDocumentId: z.string(),
@@ -183,6 +185,7 @@ export function FormBuilderDialog({ open, onOpenChange, template, onSubmit, isSu
                       <SelectItem value="BOTH">DriverOS and FleetHQ</SelectItem>
                       <SelectItem value="DRIVER">DriverOS only (operators)</SelectItem>
                       <SelectItem value="OFFICE">FleetHQ only (office)</SelectItem>
+                      <SelectItem value="DELIVERY">Delivery confirmation (POD)</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
