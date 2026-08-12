@@ -13,9 +13,10 @@ import { BillingPage } from './BillingPage';
  * class several Medium findings flag elsewhere in this app).
  */
 vi.mock('@/api/billing');
-const { toastMock } = vi.hoisted(() => ({ toastMock: vi.fn() }));
+const { toastMock, canMock } = vi.hoisted(() => ({ toastMock: vi.fn(), canMock: vi.fn(() => true) }));
 vi.mock('@/hooks/use-toast', () => ({ useToast: () => ({ toast: toastMock }) }));
-vi.mock('@/hooks/usePermissions', () => ({ usePermissions: () => ({ can: () => true }) }));
+// `can` is a hoisted mock so individual tests can flip billing:manage on/off.
+vi.mock('@/hooks/usePermissions', () => ({ usePermissions: () => ({ can: canMock }) }));
 
 const originalLocation = window.location;
 
@@ -30,6 +31,7 @@ function renderPage() {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  canMock.mockReturnValue(true);
   // A capturable stand-in for window.location so a redirect is observable and
   // jsdom doesn't attempt real navigation.
   Object.defineProperty(window, 'location', { configurable: true, value: { href: '', origin: 'http://localhost' } });
@@ -94,5 +96,36 @@ describe('BillingPage — checkout & portal', () => {
     );
     // No silent navigation to a broken URL.
     expect(window.location.href).toBe('');
+  });
+});
+
+/**
+ * M14 — permission-gated UI is actually hidden/disabled, not merely relying on
+ * the backend to reject the write. A user without `billing:manage` must not be
+ * able to trigger a plan change or open the Stripe portal from this screen.
+ */
+describe('BillingPage — permission gating (M14)', () => {
+  it('hides the portal action, disables plan changes, and explains the restriction when the user lacks billing:manage', async () => {
+    canMock.mockReturnValue(false);
+    renderPage();
+
+    // The read-only explanation renders...
+    expect(
+      await screen.findByText(/don't have permission to change billing/i),
+    ).toBeInTheDocument();
+    // ...the "Manage billing" portal button is not rendered at all...
+    expect(screen.queryByRole('button', { name: /Manage billing/ })).not.toBeInTheDocument();
+    // ...and the plan CTA is present but disabled, so the click can't fire.
+    expect(await screen.findByRole('button', { name: 'Choose Pro' })).toBeDisabled();
+  });
+
+  it('does not create a checkout session when a disabled plan CTA is clicked without billing:manage', async () => {
+    canMock.mockReturnValue(false);
+    const user = userEvent.setup();
+    renderPage();
+
+    const cta = await screen.findByRole('button', { name: 'Choose Pro' });
+    await user.click(cta).catch(() => {}); // userEvent refuses to click a disabled control
+    expect(billingApi.createCheckoutSession).not.toHaveBeenCalled();
   });
 });
