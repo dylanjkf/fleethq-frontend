@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, Gauge, History, Wrench } from 'lucide-react';
+import { ArrowLeft, DollarSign, Fuel, Gauge, History, Wrench } from 'lucide-react';
 import { getAssetDetail, updateAsset } from '@/api/assets';
 import { listTimeline } from '@/api/timeline';
 import { Badge } from '@/components/ui/badge';
@@ -18,6 +18,11 @@ import { PERMISSIONS } from '@/lib/permissions';
 import { describeApiError } from '@/lib/errors';
 function daysUntil(iso: string): number {
   return Math.round((new Date(iso).getTime() - Date.now()) / 86_400_000);
+}
+
+const audFormatter = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+function formatAud(value: number): string {
+  return audFormatter.format(value);
 }
 
 function Spec({ label, value }: { label: string; value: React.ReactNode }) {
@@ -85,8 +90,11 @@ export function AssetDetailPage() {
     );
   }
 
-  const { asset, maintenance, compliance, checklists, summary } = data;
+  const { asset, maintenance, compliance, checklists, runningCost, summary } = data;
   const customEntries = asset.customFields ? Object.entries(asset.customFields) : [];
+  const costWindowLabel = runningCost.coversFullYear
+    ? 'Fuel + maintenance · last 12 months'
+    : `Fuel + maintenance · last ${runningCost.monthsCovered} month${runningCost.monthsCovered === 1 ? '' : 's'} (since this asset was added)`;
 
   return (
     <Panel>
@@ -127,6 +135,34 @@ export function AssetDetailPage() {
           <div className="text-xs text-(--text-tertiary)">Checklists logged</div>
           <div className="text-lg font-semibold text-(--text-primary)" data-tabular>{summary.checklistCount}</div>
         </div>
+      </div>
+
+      {/* Running cost — what this asset actually costs to keep on the road. */}
+      <div className="mb-4">
+        <Section title="Running cost" icon={DollarSign}>
+          <p className="-mt-1 mb-3 text-xs text-(--text-tertiary)">{costWindowLabel}</p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-accent-500/30 bg-accent-500/5 p-4">
+              <div className="text-xs text-(--text-tertiary)">Total cost</div>
+              <div className="text-2xl font-semibold text-(--text-primary)" data-tabular>{formatAud(runningCost.totalCost)}</div>
+            </div>
+            <div className="rounded-xl border border-(--border-subtle) bg-(--surface-0)/80 p-4">
+              <div className="flex items-center gap-1.5 text-xs text-(--text-tertiary)"><Fuel className="h-3.5 w-3.5" /> Fuel</div>
+              <div className="text-lg font-semibold text-(--text-primary)" data-tabular>{formatAud(runningCost.fuelCost)}</div>
+              <div className="text-xs text-(--text-tertiary)">{runningCost.fuelEntryCount} fill-up{runningCost.fuelEntryCount === 1 ? '' : 's'}</div>
+            </div>
+            <div className="rounded-xl border border-(--border-subtle) bg-(--surface-0)/80 p-4">
+              <div className="flex items-center gap-1.5 text-xs text-(--text-tertiary)"><Wrench className="h-3.5 w-3.5" /> Maintenance</div>
+              <div className="text-lg font-semibold text-(--text-primary)" data-tabular>{formatAud(runningCost.maintenanceCost)}</div>
+              <div className="text-xs text-(--text-tertiary)">{runningCost.maintenanceJobCount} completed job{runningCost.maintenanceJobCount === 1 ? '' : 's'}</div>
+            </div>
+          </div>
+          {!runningCost.coversFullYear && (
+            <p className="mt-3 text-xs text-(--text-tertiary)">
+              This is real spend since the asset was added, not a projected annual figure — it will build toward a full 12-month picture over time.
+            </p>
+          )}
+        </Section>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-2">
