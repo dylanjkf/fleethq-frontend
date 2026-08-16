@@ -91,11 +91,12 @@ export function ForgotPasswordPage() {
   );
 }
 
-/** ≥8 chars AND at least 2 of: lowercase, uppercase, digit, symbol. */
+/** ≥8 chars AND all four of: lowercase, uppercase, digit, symbol. Mirrors the
+ *  server rule in api is-strong-password.validator.ts. */
 function passwordMeetsPolicy(value: string): boolean {
   if (value.length < 8) return false;
   const classes = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^a-zA-Z0-9]/].filter((re) => re.test(value)).length;
-  return classes >= 2;
+  return classes === 4;
 }
 
 /** Map a reset-password failure to friendly, code-driven copy. */
@@ -105,7 +106,7 @@ function resetErrorMessage(err: unknown): string {
       case 'INVALID_TOKEN':
         return 'This reset link is invalid or has expired. Request a new one.';
       case 'WEAK_PASSWORD':
-        return 'That password is too weak. Use at least 8 characters and mix upper and lower case, numbers, or symbols.';
+        return 'That password is too weak. Use at least 8 characters and include lowercase, uppercase, a number, and a symbol.';
       case 'PASSWORD_REUSED':
         return "You can't reuse a previous password. Please choose a new one.";
     }
@@ -141,7 +142,7 @@ export function ResetPasswordPage() {
     e.preventDefault();
     setError(null);
     if (!passwordMeetsPolicy(password)) {
-      setError('Use at least 8 characters and mix at least two of: upper case, lower case, numbers, symbols.');
+      setError('Use at least 8 characters and include lowercase, uppercase, a number, and a symbol.');
       return;
     }
     if (password !== confirm) {
@@ -181,7 +182,7 @@ export function ResetPasswordPage() {
             onChange={(e) => setConfirm(e.target.value)}
           />
           <p className="text-xs text-(--text-tertiary)">
-            At least 8 characters, mixing at least two of: upper case, lower case, numbers, symbols.
+            At least 8 characters, including lowercase, uppercase, a number, and a symbol.
           </p>
           {error && <ErrorState message={error} />}
           <Button type="submit" className="w-full" disabled={busy}>

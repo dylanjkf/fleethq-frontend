@@ -18,7 +18,13 @@ const signupSchema = z.object({
   companyName: z.string().trim().min(1, 'Required').max(200),
   adminName: z.string().trim().min(1, 'Required').max(200),
   adminEmail: z.string().trim().email('Enter a valid email').max(200),
-  adminPassword: z.string().min(8, 'At least 8 characters'),
+  adminPassword: z
+    .string()
+    .min(8, 'At least 8 characters, including lowercase, uppercase, a number, and a symbol')
+    .refine(
+      (v) => /[a-z]/.test(v) && /[A-Z]/.test(v) && /[0-9]/.test(v) && /[^A-Za-z0-9]/.test(v),
+      'Include lowercase, uppercase, a number, and a symbol',
+    ),
   // Kept as a string in form state (not z.coerce.number()) — an <input
   // type="number"> field value is a string regardless, and z.coerce's
   // "any input, number output" shape breaks react-hook-form's resolver
@@ -103,7 +109,7 @@ export function SignupPage() {
   }
 
   const interval = config?.billingInterval ?? 'month';
-  const perAsset = config ? money(config.pricePerAssetCents, config.currency) : '$19.00';
+  const perAsset = config ? money(config.pricePerAssetCents, config.currency) : '$9.00';
 
   return (
     <div className="flex min-h-screen">

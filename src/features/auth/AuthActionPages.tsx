@@ -74,7 +74,7 @@ export function ResetPasswordPage() {
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
-    if (password.length < 8) return setError('Use at least 8 characters.');
+    if (password.length < 8) return setError('Use at least 8 characters, including lowercase, uppercase, a number, and a symbol.');
     if (password !== confirm) return setError('Passwords do not match.');
     setBusy(true);
     try {

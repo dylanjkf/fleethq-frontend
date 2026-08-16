@@ -23,7 +23,7 @@ export function ChangePasswordCard() {
     e.preventDefault();
     setError(null);
     setDone(false);
-    if (newPassword.length < 8) return setError('Use at least 8 characters.');
+    if (newPassword.length < 8) return setError('Use at least 8 characters, including lowercase, uppercase, a number, and a symbol.');
     if (newPassword !== confirmPassword) return setError('Passwords do not match.');
     setBusy(true);
     try {
