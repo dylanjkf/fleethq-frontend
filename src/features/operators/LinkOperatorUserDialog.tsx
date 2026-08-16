@@ -11,7 +11,7 @@ import type { Operator, RoleView } from '@/api/types';
 
 const schema = z.object({
   username: z.string().min(1, 'Required').max(100),
-  password: z.string().min(8, 'At least 8 characters'),
+  password: z.string().min(8, 'At least 8 characters, including lowercase, uppercase, a number, and a symbol'),
   roleId: z.string().min(1, 'Required'),
 });
 export type LinkOperatorUserFormValues = z.infer<typeof schema>;

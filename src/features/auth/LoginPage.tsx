@@ -33,7 +33,7 @@ const policyMfaSchema = z.object({
 
 const newPasswordSchema = z
   .object({
-    newPassword: z.string().min(8, 'At least 8 characters, combining two of: lowercase, uppercase, numbers, symbols'),
+    newPassword: z.string().min(8, 'At least 8 characters, including lowercase, uppercase, a number, and a symbol'),
     confirmPassword: z.string(),
   })
   .refine((v) => v.newPassword === v.confirmPassword, { message: 'Passwords do not match', path: ['confirmPassword'] });

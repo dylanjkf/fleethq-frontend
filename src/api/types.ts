@@ -678,4 +678,12 @@ export interface BillingStatus {
   paymentFailureCount: number;
   lastPaymentFailedAt: string | null;
   nextPaymentAttemptAt: string | null;
+  /**
+   * Non-payment grace window (Part 3). `gracePeriodEndsAt` is the server-side
+   * deadline the app-wide countdown banner reads (so a refresh can't reset it);
+   * `graceDaysRemaining` is the whole days left until access goes read-only.
+   * Both null when there is no outstanding payment failure (banner hidden).
+   */
+  gracePeriodEndsAt: string | null;
+  graceDaysRemaining: number | null;
 }

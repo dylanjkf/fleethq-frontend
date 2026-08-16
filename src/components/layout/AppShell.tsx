@@ -3,6 +3,8 @@ import { Outlet } from 'react-router';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Topbar } from '@/components/layout/Topbar';
 import { CommandPalette } from '@/components/layout/CommandPalette';
+import { PaymentGraceBanner } from '@/components/layout/PaymentGraceBanner';
+import { MfaSetupNudge } from '@/components/layout/MfaSetupNudge';
 import { useRecentPages } from '@/hooks/useRecentPages';
 
 /** Shown briefly while a code-split route chunk loads. */
@@ -28,6 +30,8 @@ export function AppShell() {
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Topbar />
+        <PaymentGraceBanner />
+        <MfaSetupNudge />
         <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="mx-auto w-full max-w-[100rem] animate-fade-in">
             <Suspense fallback={<RouteFallback />}>

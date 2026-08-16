@@ -91,7 +91,7 @@ function ChangePasswordStep() {
       <div>
         <h2 className="text-sm font-semibold">Change your temporary password</h2>
         <p className="mt-1 text-xs text-(--text-tertiary)">
-          At least 8 characters, combining at least two of: lowercase, uppercase, numbers, symbols.
+          At least 8 characters, including lowercase, uppercase, a number, and a symbol.
         </p>
       </div>
       <label className="block text-sm">
