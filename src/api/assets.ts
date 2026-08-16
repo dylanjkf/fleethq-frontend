@@ -46,11 +46,29 @@ export interface AssetChecklistRow {
   createdAt: string;
   template: { name: string };
 }
+/**
+ * What this asset has actually cost to run over the trailing 12 months —
+ * fuel plus completed maintenance (parts + labour). `coversFullYear` is false
+ * (and `monthsCovered` < 12) for an asset younger than the window, so the UI
+ * can show the real partial figure without implying a full year.
+ */
+export interface AssetRunningCost {
+  windowStart: string;
+  windowEnd: string;
+  monthsCovered: number;
+  coversFullYear: boolean;
+  fuelCost: number;
+  maintenanceCost: number;
+  totalCost: number;
+  fuelEntryCount: number;
+  maintenanceJobCount: number;
+}
 export interface AssetDetail {
   asset: Asset;
   maintenance: AssetMaintenanceRow[];
   compliance: AssetComplianceRow[];
   checklists: AssetChecklistRow[];
+  runningCost: AssetRunningCost;
   summary: { openMaintenanceCount: number; complianceCount: number; checklistCount: number };
 }
 
