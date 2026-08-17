@@ -19,7 +19,7 @@ export function MfaSetupNudge() {
   const [dismissed, setDismissed] = useState(() => {
     if (!user) return true;
     try {
-      return localStorage.getItem(dismissKey(user.id)) === '1';
+      return localStorage.getItem(dismissKey(user.userId)) === '1';
     } catch {
       return false;
     }
@@ -29,7 +29,7 @@ export function MfaSetupNudge() {
 
   const dismiss = () => {
     try {
-      localStorage.setItem(dismissKey(user.id), '1');
+      localStorage.setItem(dismissKey(user.userId), '1');
     } catch {
       /* ignore */
     }
