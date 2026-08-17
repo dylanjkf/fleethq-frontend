@@ -62,11 +62,11 @@ describe('ResetPasswordPage (token-based completion)', () => {
       </MemoryRouter>,
     );
 
-    await userEvent.type(screen.getByPlaceholderText(/^New password$/i), 'Str0ngPass');
-    await userEvent.type(screen.getByPlaceholderText(/Confirm new password/i), 'Str0ngPass');
+    await userEvent.type(screen.getByPlaceholderText(/^New password$/i), 'Str0ngPass!');
+    await userEvent.type(screen.getByPlaceholderText(/Confirm new password/i), 'Str0ngPass!');
     await userEvent.click(screen.getByRole('button', { name: /Save new password/i }));
 
-    expect(authApi.resetPassword).toHaveBeenCalledWith('raw-token-123', 'Str0ngPass');
+    expect(authApi.resetPassword).toHaveBeenCalledWith('raw-token-123', 'Str0ngPass!');
     expect(await screen.findByText(/Password updated/i)).toBeInTheDocument();
     await waitFor(() => expect(screen.getByText('LOGIN SCREEN')).toBeInTheDocument(), { timeout: 3000 });
   });
@@ -81,8 +81,8 @@ describe('ResetPasswordPage (token-based completion)', () => {
       </MemoryRouter>,
     );
 
-    await userEvent.type(screen.getByPlaceholderText(/^New password$/i), 'Str0ngPass');
-    await userEvent.type(screen.getByPlaceholderText(/Confirm new password/i), 'Str0ngPass');
+    await userEvent.type(screen.getByPlaceholderText(/^New password$/i), 'Str0ngPass!');
+    await userEvent.type(screen.getByPlaceholderText(/Confirm new password/i), 'Str0ngPass!');
     await userEvent.click(screen.getByRole('button', { name: /Save new password/i }));
 
     expect(await screen.findByText(/This reset link is invalid or has expired/i)).toBeInTheDocument();
