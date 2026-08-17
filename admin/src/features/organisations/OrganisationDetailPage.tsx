@@ -13,13 +13,14 @@ import { NotesTab } from './tabs/NotesTab';
 import { FeatureFlagsTab } from './tabs/FeatureFlagsTab';
 import { AssetsTab, OperatorsTab } from './tabs/FleetTabs';
 import { OrgInspectionsTab, OrgMaintenanceTab } from './tabs/OpsTabs';
+import { CockpitTab } from './tabs/CockpitTab';
 
-type TabKey = 'overview' | 'assets' | 'operators' | 'inspections' | 'maintenance' | 'billing' | 'notes' | 'feature-flags';
+type TabKey = 'cockpit' | 'overview' | 'assets' | 'operators' | 'inspections' | 'maintenance' | 'billing' | 'notes' | 'feature-flags';
 
 export function OrganisationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { hasPermission } = useAuth();
-  const [tab, setTab] = useState<TabKey>('overview');
+  const [tab, setTab] = useState<TabKey>('cockpit');
 
   const query = useQuery({ queryKey: ['organisation', id], queryFn: () => getOrganisation(id!), enabled: !!id });
 
@@ -30,6 +31,9 @@ export function OrganisationDetailPage() {
   const org = query.data;
 
   const tabs: { key: TabKey; label: string; visible: boolean }[] = [
+    // Cockpit (customer 360) reuses the same organisations:view that already
+    // gates reaching this page, so it needs no extra permission of its own.
+    { key: 'cockpit', label: 'Cockpit', visible: true },
     { key: 'overview', label: 'Overview', visible: true },
     { key: 'assets', label: 'Assets', visible: hasPermission('fleet:view') },
     { key: 'operators', label: 'Operators', visible: hasPermission('fleet:view') },
@@ -67,6 +71,7 @@ export function OrganisationDetailPage() {
           ))}
       </div>
 
+      {tab === 'cockpit' && <CockpitTab companyId={org.id} onNavigateTab={setTab} />}
       {tab === 'overview' && <OverviewTab org={org} />}
       {tab === 'assets' && hasPermission('fleet:view') && <AssetsTab companyId={org.id} />}
       {tab === 'operators' && hasPermission('fleet:view') && <OperatorsTab companyId={org.id} />}

@@ -1,5 +1,5 @@
 import { apiClient } from './client';
-import type { ImpersonationResult, OrganisationDetail, OrganisationSummary, Paginated } from './types';
+import type { ImpersonationResult, OrganisationDetail, OrganisationSummary, OrgCockpit, Paginated } from './types';
 
 export interface ListOrganisationsParams {
   page?: number;
@@ -15,6 +15,12 @@ export async function listOrganisations(params: ListOrganisationsParams): Promis
 
 export async function getOrganisation(id: string): Promise<OrganisationDetail> {
   const { data } = await apiClient.get<OrganisationDetail>(`/v1/admin/organisations/${id}`);
+  return data;
+}
+
+/** Support & ops cockpit — the customer 360 (B2). Read-only; gated on organisations:view. */
+export async function getOrganisationCockpit(id: string): Promise<OrgCockpit> {
+  const { data } = await apiClient.get<OrgCockpit>(`/v1/admin/organisations/${id}/cockpit`);
   return data;
 }
 

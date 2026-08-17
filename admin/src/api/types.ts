@@ -97,6 +97,53 @@ export interface ImpersonationResult {
   company: { id: string; name: string };
 }
 
+// ── Cockpit — customer 360 (B2) ───────────────────────────────────────────
+// Mirrors AdminOrganisationsService.getCockpit: a read-only assembly of
+// billing/grace, usage signals, currently-open flags, and the recent
+// admin-activity feed for one company, composed from data that already exists.
+export interface OrgCockpit {
+  id: string;
+  name: string;
+  jurisdiction: string;
+  createdAt: string;
+  suspendedAt: string | null;
+  suspensionReason: string | null;
+  archivedAt: string | null;
+  billing: {
+    subscriptionStatus: SubscriptionStatus;
+    planPriceId: string | null;
+    trialEndsAt: string | null;
+    trialActive: boolean;
+    assetQuantity: number | null;
+    paymentFailureCount: number;
+    gracePeriodEndsAt: string | null;
+    nextPaymentAttemptAt: string | null;
+    contractEndsAt: string | null;
+  };
+  usage: {
+    assets: number;
+    operators: number;
+    users: number;
+    recentJobs30d: number;
+    lastActiveAt: string | null;
+  };
+  flags: {
+    pastDue: boolean;
+    inGrace: boolean;
+    graceElapsed: boolean;
+    trialExpiringSoon: boolean;
+    featureFlagOverrides: { key: string; name: string; enabled: boolean }[];
+  };
+  recentActivity: {
+    id: string;
+    action: string;
+    entityType: string;
+    adminUserId: string | null;
+    reason: string | null;
+    createdAt: string;
+  }[];
+}
+
 // ── Customer users ────────────────────────────────────────────────────────
 
 export interface CustomerUserDetail {
@@ -223,6 +270,21 @@ export interface SystemHealth {
   database: { customerApiConnected: boolean; adminPlatformConnected: boolean };
   process: { uptimeSeconds: number; nodeVersion: string; nodeEnv: string };
   version: { apiVersion: string; deployedCommit: string | null };
+  // Scheduler health (B4) — real scheduler_leases rows. COARSE by design: only
+  // "who last claimed each task and when" is persisted, so `granularity` is
+  // 'last_claimed', not a per-run pass/fail outcome.
+  scheduler: {
+    enabled: boolean;
+    granularity: string;
+    tasks: { task: string; holder: string; lastClaimedAt: string; leaseHeldUntil: string }[];
+  };
+  // Observability (B4) — reported HONESTLY. These two feeds don't exist in a
+  // queryable form in this deployment, so the flags say so rather than showing a
+  // fabricated 5xx-rate or bounce number.
+  observability: {
+    errorTracking: { provider: string; configured: boolean; summaryAvailable: boolean; note: string };
+    emailDelivery: { provider: string; failureLogAvailable: boolean; note: string };
+  };
   checkedAt: string;
 }
 
