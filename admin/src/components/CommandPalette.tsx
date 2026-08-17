@@ -78,15 +78,15 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Command palette — search organisations, users, and assets, or jump to a page"
+        aria-label="Command palette — search organisations, users, assets, and jobs, or jump to a page"
         tabIndex={-1}
       >
         <input
           ref={inputRef}
           value={q}
           onChange={(e) => setQ(e.target.value)}
-          aria-label="Search organisations, users, assets, or jump to a page"
-          placeholder="Search organisations, users, assets… or jump to a page"
+          aria-label="Search organisations, users, assets, jobs, or jump to a page"
+          placeholder="Search organisations, users, assets, jobs… or jump to a page"
           className="w-full border-b border-(--border-subtle) bg-transparent px-5 py-4 text-sm outline-none placeholder:text-(--text-tertiary)"
         />
         <div className="max-h-96 overflow-y-auto p-2 text-sm">
@@ -114,7 +114,11 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
               {results.users.map((u) => (
                 <Row key={u.id} onClick={() => go(`/customer-users/${u.id}`)}>
                   {u.fullName}
-                  <span className="text-(--text-tertiary)"> · {u.email ?? ''}</span>
+                  <span className="text-(--text-tertiary)">
+                    {' · '}
+                    {u.email ?? ''}
+                    {u.companies.length > 0 && ` · ${u.companies.map((c) => c.name).join(', ')}`}
+                  </span>
                 </Row>
               ))}
             </Section>
@@ -129,11 +133,24 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
               ))}
             </Section>
           )}
+          {results && results.jobs.length > 0 && (
+            <Section title="Jobs">
+              {results.jobs.map((j) => (
+                // No standalone admin job page exists; a support operator working a
+                // load reference wants the owning tenant, so jump to the company.
+                <Row key={j.id} onClick={() => go(`/organisations/${j.company.id}`)}>
+                  {j.title}
+                  <span className="text-(--text-tertiary)"> · {j.company.name}</span>
+                </Row>
+              ))}
+            </Section>
+          )}
 
           {destinations.length === 0 &&
             !results?.companies.length &&
             !results?.users.length &&
             !results?.assets.length &&
+            !results?.jobs.length &&
             // Distinguish searching / failed / genuinely-empty instead of always
             // claiming "No matches" (Round 3): a slow or failed search read no
             // longer reads as "nothing found".

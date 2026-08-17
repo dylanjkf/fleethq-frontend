@@ -88,6 +88,76 @@ export function SystemHealthPage() {
         </CardBody>
       </Card>
 
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="text-sm font-semibold">Scheduler</h2>
+            <Badge tone={health.scheduler.enabled ? 'success' : 'neutral'}>{health.scheduler.enabled ? 'Enabled' : 'Disabled'}</Badge>
+          </div>
+        </CardHeader>
+        <CardBody>
+          <p className="mb-3 text-xs text-(--text-tertiary)">
+            Coarse health from the leader-election leases — last claim per task. No per-run pass/fail is persisted
+            (granularity: {health.scheduler.granularity}).
+          </p>
+          {health.scheduler.tasks.length === 0 ? (
+            <p className="text-sm text-(--text-tertiary)">No scheduler leases recorded yet.</p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-(--border-subtle) text-left text-xs uppercase tracking-wide text-(--text-tertiary)">
+                  <th className="py-2 pr-4 font-medium">Task</th>
+                  <th className="py-2 pr-4 font-medium">Holder</th>
+                  <th className="py-2 pr-4 font-medium">Last claimed</th>
+                  <th className="py-2 font-medium">Lease held until</th>
+                </tr>
+              </thead>
+              <tbody>
+                {health.scheduler.tasks.map((t) => (
+                  <tr key={t.task} className="border-b border-(--border-subtle) last:border-0">
+                    <td className="py-2 pr-4 font-medium">{t.task}</td>
+                    <td className="py-2 pr-4 text-(--text-secondary)">{t.holder}</td>
+                    <td className="py-2 pr-4 text-(--text-secondary)">{new Date(t.lastClaimedAt).toLocaleString()}</td>
+                    <td className="py-2 text-(--text-secondary)">{new Date(t.leaseHeldUntil).toLocaleString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </CardBody>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <h2 className="text-sm font-semibold">Observability</h2>
+        </CardHeader>
+        <CardBody className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-(--text-tertiary)">Error tracking ({health.observability.errorTracking.provider})</p>
+              <Badge tone={health.observability.errorTracking.configured ? 'success' : 'warning'}>
+                {health.observability.errorTracking.configured ? 'Configured' : 'Not configured'}
+              </Badge>
+            </div>
+            {/* Honest gap: no in-app 5xx-rate aggregate exists — we say so rather than showing a fake graph. */}
+            {!health.observability.errorTracking.summaryAvailable && (
+              <p className="mt-1 text-xs text-(--text-tertiary)">{health.observability.errorTracking.note}</p>
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-(--text-tertiary)">Email delivery ({health.observability.emailDelivery.provider})</p>
+              <Badge tone={health.observability.emailDelivery.failureLogAvailable ? 'success' : 'warning'}>
+                {health.observability.emailDelivery.failureLogAvailable ? 'Failure feed available' : 'No failure feed'}
+              </Badge>
+            </div>
+            {!health.observability.emailDelivery.failureLogAvailable && (
+              <p className="mt-1 text-xs text-(--text-tertiary)">{health.observability.emailDelivery.note}</p>
+            )}
+          </div>
+        </CardBody>
+      </Card>
+
       <p className="text-xs text-(--text-tertiary)">Checked at {new Date(health.checkedAt).toLocaleString()}</p>
     </div>
   );
