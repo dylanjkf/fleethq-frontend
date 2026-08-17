@@ -33,14 +33,16 @@ the LAN-reachable variant).
 
 ## Environment variables
 
-Copy `.env.example` to `.env.production` before a production build (Vite
-bakes `VITE_*` vars into the bundle at build time — there is no runtime env
-var for a static SPA). All are optional for a working build; unset falls
-back to safe defaults.
+Vite bakes `VITE_*` vars into the bundle at build time — there is no runtime
+env var for a static SPA. **Do NOT commit a `.env.production`** (the repo's
+`.gitignore` ignores `.env.*`); on Vercel, `scripts/vercel-build.sh` sets
+`VITE_API_URL` per deploy environment (see Deployment below), and everything
+else comes from Vercel's Environment Variables UI.
 
 | Variable | Purpose | Required |
 | --- | --- | --- |
-| `VITE_API_URL` | Absolute base URL of the deployed `fleethq-platform` API, e.g. `https://api.fleethq.online` (no trailing slash). Unset falls back to same-origin `/`, which only works when this app and the API share an origin — not the case in production. | Yes, in any deployed environment |
+| `VITE_API_URL` | Absolute base URL of the deployed `fleethq-platform` API, e.g. `https://api.fleethq.online` (no trailing slash). On Vercel it is set by `scripts/vercel-build.sh` (production → the Railway API; preview → `VITE_PREVIEW_API_URL`). Unset falls back to same-origin `/`, which only works when this app and the API share an origin. | Set by the build script on Vercel |
+| `VITE_PREVIEW_API_URL` | **Preview only.** The NON-production API a PR preview build points at. If unset, the preview build **fails on purpose** rather than silently transacting against the production API/database/Stripe (there is no staging API yet — see A4). | Yes, for preview deploys |
 | `VITE_SENTRY_DSN` | Error tracking (see `src/instrument.ts`). Unset is a safe no-op. | No |
 | `VITE_STRIPE_PRICE_ID` | The Stripe Price ID the Billing page's "Subscribe" button checks out. Unset explains no plan is configured rather than sending an empty priceId. | No |
 
@@ -55,7 +57,7 @@ paths to its own `index.html` so a hard reload on e.g. `/dispatch` or
 
 ```json
 {
-  "buildCommand": "npm install && npm run build && npm --prefix admin install && npm --prefix admin run build && rm -rf dist/admin && mv admin/dist dist/admin",
+  "buildCommand": "bash scripts/vercel-build.sh",
   "outputDirectory": "dist",
   "rewrites": [
     { "source": "/admin/(.*)", "destination": "/admin/index.html" },
@@ -63,6 +65,12 @@ paths to its own `index.html` so a hard reload on e.g. `/dispatch` or
   ]
 }
 ```
+
+`scripts/vercel-build.sh` chooses `VITE_API_URL` from `VERCEL_ENV` before
+running both builds (**production** → the Railway API; **preview** →
+`VITE_PREVIEW_API_URL`, or the build **fails loudly** if that isn't set, so a
+PR preview never silently hits the production API/DB/Stripe), then does the
+same `npm ci` + build + admin-stitch as before.
 
 The `/admin/(.*)` rewrite must come first — Vercel evaluates `rewrites` in
 order, and the catch-all `/(.*)` would otherwise swallow every `/admin/*`

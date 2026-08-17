@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/Input';
 import { ErrorState } from '@/components/ui/EmptyState';
 import { requestPasswordReset, resetPassword } from '@/api/auth';
 import { ApiClientError } from '@/api/client';
+import { passwordMeetsPolicy, passwordErrorMessage } from './password-policy';
 
 function Shell({ title, description, children }: { title: string; description: string; children: ReactNode }) {
   return (
@@ -91,29 +92,6 @@ export function ForgotPasswordPage() {
   );
 }
 
-/** ≥8 chars AND all four of: lowercase, uppercase, digit, symbol. Mirrors the
- *  server rule in api is-strong-password.validator.ts. */
-function passwordMeetsPolicy(value: string): boolean {
-  if (value.length < 8) return false;
-  const classes = [/[a-z]/, /[A-Z]/, /[0-9]/, /[^a-zA-Z0-9]/].filter((re) => re.test(value)).length;
-  return classes === 4;
-}
-
-/** Map a reset-password failure to friendly, code-driven copy. */
-function resetErrorMessage(err: unknown): string {
-  if (err instanceof ApiClientError) {
-    switch (err.code) {
-      case 'INVALID_TOKEN':
-        return 'This reset link is invalid or has expired. Request a new one.';
-      case 'WEAK_PASSWORD':
-        return 'That password is too weak. Use at least 8 characters and include lowercase, uppercase, a number, and a symbol.';
-      case 'PASSWORD_REUSED':
-        return "You can't reuse a previous password. Please choose a new one.";
-    }
-  }
-  return 'Could not reset your password. Check your connection and try again.';
-}
-
 /** Choose a new password from the emailed reset link (?token=...). */
 export function ResetPasswordPage() {
   const [params] = useSearchParams();
@@ -155,7 +133,7 @@ export function ResetPasswordPage() {
       setDone(true);
       setTimeout(() => navigate('/login', { replace: true }), 1800);
     } catch (err) {
-      setError(resetErrorMessage(err));
+      setError(passwordErrorMessage(err, 'reset'));
     } finally {
       setBusy(false);
     }

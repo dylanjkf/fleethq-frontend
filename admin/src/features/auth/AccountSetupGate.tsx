@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
 import { ErrorState } from '@/components/ui/EmptyState';
 import { ApiClientError } from '@/api/client';
+import { passwordMeetsPolicy, passwordErrorMessage, PASSWORD_POLICY_HINT } from './password-policy';
 
 /**
  * Blocking account-setup flow the server forces before it will honour any
@@ -67,6 +68,12 @@ function ChangePasswordStep() {
   async function submit(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    // Client-side policy check first, matching the sibling ResetPasswordPage —
+    // immediate feedback instead of a round-trip to the server's WEAK_PASSWORD.
+    if (!passwordMeetsPolicy(newPassword)) {
+      setError(`That password is too weak. ${PASSWORD_POLICY_HINT}`);
+      return;
+    }
     if (newPassword !== confirm) {
       setError('The new passwords do not match.');
       return;
@@ -80,7 +87,9 @@ function ChangePasswordStep() {
       tokenStore.set(accessToken);
       await refreshMe();
     } catch (err) {
-      setError(err instanceof ApiClientError ? err.message : 'Could not change your password.');
+      // Friendly, code-driven copy (wrong current password, reuse, weak) — same
+      // mapping the reset flow uses.
+      setError(passwordErrorMessage(err, 'change'));
     } finally {
       setSubmitting(false);
     }
