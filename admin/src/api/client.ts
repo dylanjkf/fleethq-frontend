@@ -54,7 +54,14 @@ apiClient.interceptors.response.use(
     const status = error.response?.status ?? 0;
     const body = error.response?.data?.error;
 
-    if (status === 401) {
+    // A 401 normally means the session/token is dead → wipe it and bounce to
+    // login. But a wrong second factor at the login MFA challenge also comes
+    // back as 401 MFA_CODE_INVALID — that's a retryable input error on a flow
+    // that isn't signed in yet, NOT a dead session. Force-logging-out on it
+    // (a) throws an enrolling admin all the way back to the username/password
+    // screen and (b) discards the in-progress mfaToken. Let those propagate as
+    // a normal error so the login/setup screen can show "that code is wrong".
+    if (status === 401 && body?.code !== 'MFA_CODE_INVALID') {
       tokenStore.clear();
       onUnauthorized?.();
     }
