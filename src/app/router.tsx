@@ -9,6 +9,7 @@ import { ContactPage } from '@/features/auth/ContactPage';
 import { TermsPage, PrivacyPage } from '@/features/auth/LegalPages';
 import { ForgotPasswordPage, MagicLinkPage, OAuthCallbackPage, ResetPasswordPage, VerifyEmailPage } from '@/features/auth/AuthActionPages';
 import { NotFoundPage } from '@/features/shared/NotFoundPage';
+import { FeatureFlagGate } from '@/app/FeatureFlagGate';
 // Feature pages are code-split (React.lazy, in ./lazyPages) — each route ships
 // as its own chunk fetched on first navigation. The Suspense boundary lives in
 // AppShell around <Outlet/>.
@@ -50,7 +51,7 @@ export const routes: RouteObject[] = [
           { path: '/attached-units/:attachedUnitId', element: <AttachedUnitDetailPage /> },
           { path: '/operators', element: <OperatorsListPage /> },
           { path: '/maintenance', element: <MaintenancePage /> },
-          { path: '/warehouse', element: <WarehousePage /> },
+          { path: '/warehouse', element: <FeatureFlagGate flag="warehouse"><WarehousePage /></FeatureFlagGate> },
           { path: '/dispatch', element: <DispatchPage /> },
           { path: '/fuel', element: <FuelPage /> },
           { path: '/customers', element: <CustomersPage /> },

@@ -51,6 +51,14 @@ export interface NavItem {
   group: NavGroup;
   /** Shown if the user has ANY of these. Omitted entirely means always visible. */
   permissions?: PermissionKey[];
+  /**
+   * Admin-managed feature flag that must be ON for this item to appear (the
+   * `@RequireFeatureFlag` rollout axis). Omitted means "not flag-gated". A
+   * gated item is hidden unless the flag evaluates on for the company — so a
+   * still-maturing module can ship dark and be revealed from the admin console
+   * without a deploy.
+   */
+  featureFlag?: string;
   status: 'active' | 'coming-soon';
 }
 
@@ -124,15 +132,18 @@ export const NAV_ITEMS: NavItem[] = [
     status: 'active',
   },
   {
-    // Paid add-on: the page itself renders an upgrade prompt when the company
-    // lacks the 'warehouse' entitlement (data entry is never gated — see
-    // WarehousePage). The nav entry is permission-gated so operators without
-    // warehouse access don't see a dead link.
+    // Paid add-on, hidden by default while the module matures. Three gates:
+    // the `warehouse` admin feature flag (off by default — the nav entry only
+    // appears once FleetHQ staff turn it on for the company), the
+    // `warehouse:view` permission (so operators without access don't see a dead
+    // link), and the plan entitlement enforced on the page/API. Data entry is
+    // never gated — see WarehousePage.
     label: 'Warehouse',
     path: '/warehouse',
     icon: Boxes,
     group: 'Fleet',
     permissions: [PERMISSIONS.WAREHOUSE_VIEW],
+    featureFlag: 'warehouse',
     status: 'active',
   },
   {
