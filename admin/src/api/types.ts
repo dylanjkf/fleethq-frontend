@@ -114,7 +114,6 @@ export interface OrgCockpit {
     planPriceId: string | null;
     trialEndsAt: string | null;
     trialActive: boolean;
-    assetQuantity: number | null;
     paymentFailureCount: number;
     gracePeriodEndsAt: string | null;
     nextPaymentAttemptAt: string | null;

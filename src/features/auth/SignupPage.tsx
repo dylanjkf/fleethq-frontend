@@ -11,9 +11,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { ApiClientError } from '@/api/client';
 import { createSignup, getSignupConfig, type SignupConfig } from '@/api/signup';
 
-const MIN_QUANTITY = 1;
-const MAX_QUANTITY = 100_000;
-
 const signupSchema = z.object({
   companyName: z.string().trim().min(1, 'Required').max(200),
   adminName: z.string().trim().min(1, 'Required').max(200),
@@ -25,13 +22,6 @@ const signupSchema = z.object({
       (v) => /[a-z]/.test(v) && /[A-Z]/.test(v) && /[0-9]/.test(v) && /[^A-Za-z0-9]/.test(v),
       'Include lowercase, uppercase, a number, and a symbol',
     ),
-  // Kept as a string in form state (not z.coerce.number()) — an <input
-  // type="number"> field value is a string regardless, and z.coerce's
-  // "any input, number output" shape breaks react-hook-form's resolver
-  // generics. Parsed to a number in onSubmit; the charge is server-computed.
-  quantity: z
-    .string()
-    .refine((v) => /^\d+$/.test(v) && Number(v) >= MIN_QUANTITY && Number(v) <= MAX_QUANTITY, `Enter a number from ${MIN_QUANTITY} to ${MAX_QUANTITY}`),
   acceptedTerms: z.boolean().refine((v) => v === true, { message: 'Please accept the terms to continue' }),
   // Honeypot — hidden from real users; a filled value blocks submission (bot).
   website: z.string().max(0).optional(),
@@ -59,7 +49,7 @@ export function SignupPage() {
 
   const form = useForm<SignupForm>({
     resolver: zodResolver(signupSchema),
-    defaultValues: { companyName: '', adminName: '', adminEmail: '', adminPassword: '', quantity: '5', acceptedTerms: false, website: '' },
+    defaultValues: { companyName: '', adminName: '', adminEmail: '', adminPassword: '', acceptedTerms: false, website: '' },
   });
 
   useEffect(() => {
@@ -69,15 +59,14 @@ export function SignupPage() {
       .finally(() => setConfigLoading(false));
   }, []);
 
-  const quantity = form.watch('quantity');
-  const preview = useMemo(() => {
+  // Flat monthly price for the whole account — a single figure, plus GST. It
+  // does NOT scale with fleet size, so there's no quantity to pick.
+  const price = useMemo(() => {
     if (!config) return null;
-    const parsed = /^\d+$/.test(quantity) ? Number(quantity) : 0;
-    const qty = parsed >= MIN_QUANTITY ? Math.min(MAX_QUANTITY, parsed) : 0;
-    const subtotal = qty * config.pricePerAssetCents;
+    const subtotal = config.priceCents;
     const gst = Math.round(subtotal * config.gstRate);
-    return { qty, subtotal, gst, total: subtotal + gst };
-  }, [config, quantity]);
+    return { subtotal, gst, total: subtotal + gst };
+  }, [config]);
 
   // An already-signed-in user has no business on the signup page.
   if (status === 'authenticated') return <Navigate to="/" replace />;
@@ -90,7 +79,6 @@ export function SignupPage() {
         adminName: values.adminName.trim(),
         adminEmail: values.adminEmail.trim(),
         adminPassword: values.adminPassword,
-        quantity: Number(values.quantity),
         acceptedTerms: true,
         website: values.website,
       });
@@ -102,14 +90,8 @@ export function SignupPage() {
     }
   }
 
-  function adjustQuantity(delta: number) {
-    const current = /^\d+$/.test(quantity) ? Number(quantity) : MIN_QUANTITY;
-    const next = Math.min(MAX_QUANTITY, Math.max(MIN_QUANTITY, current + delta));
-    form.setValue('quantity', String(next), { shouldValidate: true, shouldDirty: true });
-  }
-
   const interval = config?.billingInterval ?? 'month';
-  const perAsset = config ? money(config.pricePerAssetCents, config.currency) : '$9.00';
+  const priceLabel = config ? money(config.priceCents, config.currency) : '$29.00';
 
   return (
     <div className="flex min-h-screen">
@@ -129,7 +111,7 @@ export function SignupPage() {
           <p className="text-[0.6875rem] font-semibold uppercase tracking-[0.12em] text-accent-200/80">Start in minutes</p>
           <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight">Put your whole fleet on one platform.</h1>
           <p className="mt-4 text-sm leading-relaxed text-white/60">
-            {perAsset} per asset, per {interval}. Pay only for what you track — add or remove assets any time. No setup fees.
+            {priceLabel} per {interval}, flat — for the whole account. Track as many assets as you like; the price never changes with fleet size. No setup fees.
           </p>
         </div>
         <div className="relative flex items-center gap-6 text-[0.6875rem] font-medium uppercase tracking-[0.08em] text-white/40">
@@ -150,7 +132,7 @@ export function SignupPage() {
           <Card className="w-full">
             <CardHeader className="flex-col items-start gap-1">
               <CardTitle className="text-lg">Create your FleetHQ account</CardTitle>
-              <CardDescription>Choose how many assets to track, pay securely, and start straight away.</CardDescription>
+              <CardDescription>One flat price for your whole account. Pay securely and start straight away.</CardDescription>
             </CardHeader>
             <CardContent>
               {configLoading ? (
@@ -200,42 +182,22 @@ export function SignupPage() {
                       </FormItem>
                     )} />
 
-                    <FormField control={form.control} name="quantity" render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Assets to track</FormLabel>
-                        <FormControl>
-                          <div className="flex items-center gap-2">
-                            <Button type="button" variant="secondary" aria-label="Decrease" className="h-9 w-9 shrink-0 p-0" onClick={() => adjustQuantity(-1)}>−</Button>
-                            <Input
-                              type="number"
-                              inputMode="numeric"
-                              min={MIN_QUANTITY}
-                              max={MAX_QUANTITY}
-                              className="text-center"
-                              {...field}
-                            />
-                            <Button type="button" variant="secondary" aria-label="Increase" className="h-9 w-9 shrink-0 p-0" onClick={() => adjustQuantity(1)}>+</Button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )} />
-
-                    {/* Live price preview — convenience only; the charge is recomputed server-side. */}
-                    {preview && (
+                    {/* Flat price summary — convenience only; the charge is the Stripe price, computed server-side. */}
+                    {price && (
                       <div className="rounded-md border border-(--border) bg-(--surface-2) p-3 text-sm">
                         <div className="flex justify-between text-(--text-secondary)">
-                          <span>{preview.qty} {preview.qty === 1 ? 'asset' : 'assets'} × {perAsset}</span>
-                          <span>{money(preview.subtotal, config.currency)}</span>
+                          <span>FleetHQ — whole account</span>
+                          <span>{money(price.subtotal, config.currency)}</span>
                         </div>
                         <div className="flex justify-between text-(--text-secondary)">
                           <span>GST ({Math.round(config.gstRate * 100)}%)</span>
-                          <span>{money(preview.gst, config.currency)}</span>
+                          <span>{money(price.gst, config.currency)}</span>
                         </div>
                         <div className="mt-1 flex justify-between border-t border-(--border) pt-1 font-semibold text-(--text-primary)">
                           <span>Total per {interval}</span>
-                          <span>{money(preview.total, config.currency)}</span>
+                          <span>{money(price.total, config.currency)}</span>
                         </div>
+                        <p className="mt-2 text-xs text-(--text-tertiary)">Unlimited assets and users — the price never scales with your fleet.</p>
                       </div>
                     )}
 

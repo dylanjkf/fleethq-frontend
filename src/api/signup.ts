@@ -1,9 +1,10 @@
 import { apiClient } from './client';
 
-/** Pricing/config for the signup page's live preview (authoritative price lives server-side). */
+/** Pricing/config for the signup page (authoritative price lives server-side). */
 export interface SignupConfig {
   enabled: boolean;
-  pricePerAssetCents: number;
+  /** Flat monthly price for the whole account, in cents (does not scale with fleet size). */
+  priceCents: number;
   currency: string;
   billingInterval: string;
   gstRate: number;
@@ -14,7 +15,6 @@ export interface SignupPayload {
   adminName: string;
   adminEmail: string;
   adminPassword: string;
-  quantity: number;
   acceptedTerms: boolean;
   /** Honeypot — always empty for real users; a filled value is rejected server-side. */
   website?: string;
