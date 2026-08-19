@@ -98,8 +98,8 @@ export function ImpactPage() {
           <ChartBlock title="Deliveries handled each month" hint="Delivered vs failed — every parcel with a recorded, provable outcome.">
             <StackedBars
               series={data.series.map((m) => ({ label: m.label, segments: [
-                { value: m.delivered, className: 'fill-accent-500' },
-                { value: m.failed, className: 'fill-danger-500' },
+                { value: m.delivered, className: 'bg-accent-500' },
+                { value: m.failed, className: 'bg-danger-500' },
               ] }))}
               formatTotal={(n) => n.toLocaleString()}
             />
@@ -120,7 +120,7 @@ export function ImpactPage() {
           {/* Compliance */}
           <ChartBlock title="Pre-start safety checks completed" hint="Digital pre-start inspections replacing paper — a compliance record for every shift.">
             <StackedBars
-              series={data.series.map((m) => ({ label: m.label, segments: [{ value: m.checklists, className: 'fill-accent-500' }] }))}
+              series={data.series.map((m) => ({ label: m.label, segments: [{ value: m.checklists, className: 'bg-accent-500' }] }))}
               formatTotal={(n) => n.toLocaleString()}
             />
           </ChartBlock>
@@ -128,7 +128,7 @@ export function ImpactPage() {
           {/* Maintenance cost */}
           <ChartBlock title="Maintenance spend, tracked" hint="Every repair costed against its asset — spend you can see and control.">
             <StackedBars
-              series={data.series.map((m) => ({ label: m.label, segments: [{ value: m.maintenanceCost, className: 'fill-accent-500' }] }))}
+              series={data.series.map((m) => ({ label: m.label, segments: [{ value: m.maintenanceCost, className: 'bg-accent-500' }] }))}
               formatTotal={(n) => currency(n)}
             />
           </ChartBlock>
@@ -178,7 +178,13 @@ function Legend({ items }: { items: { label: string; className: string }[] }) {
   );
 }
 
-/** Vertical stacked-bar chart — one bar per month, segments stacked bottom-up. */
+/**
+ * Vertical stacked-bar chart — one bar per month, segments stacked bottom-up.
+ * Each segment renders as an HTML <div>, so `segments[].className` must be a
+ * background utility (`bg-*`), NOT an SVG `fill-*` utility. In Tailwind v4
+ * `fill-*` only sets the SVG `fill` presentation attribute and paints nothing on
+ * a div — using it here is exactly what made these bars render invisible before.
+ */
 function StackedBars({ series, formatTotal }: { series: { label: string; segments: { value: number; className: string }[] }[]; formatTotal: (n: number) => string }) {
   const totals = series.map((s) => s.segments.reduce((sum, seg) => sum + seg.value, 0));
   const max = Math.max(...totals, 1);
