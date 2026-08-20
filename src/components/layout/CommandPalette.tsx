@@ -17,6 +17,7 @@ import {
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { NAV_ITEMS } from '@/app/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { useCommandPalette } from '@/hooks/useCommandPalette';
 import { useReadRecentPages } from '@/hooks/useRecentPages';
 import { search as searchApi, type SearchResultItem } from '@/api/search';
@@ -62,6 +63,7 @@ interface FlatAction {
 export function CommandPalette() {
   const { open, setOpen } = useCommandPalette();
   const { canAny } = usePermissions();
+  const { isEnabled } = useFeatureFlags();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
@@ -86,9 +88,12 @@ export function CommandPalette() {
   const availableNav = useMemo(
     () =>
       NAV_ITEMS.filter(
-        (item) => item.status === 'active' && (!item.permissions || canAny(item.permissions)),
+        (item) =>
+          item.status === 'active' &&
+          (!item.permissions || canAny(item.permissions)) &&
+          (!item.featureFlag || isEnabled(item.featureFlag)),
       ),
-    [canAny],
+    [canAny, isEnabled],
   );
 
   const navResults = useMemo(() => {

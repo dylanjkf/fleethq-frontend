@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import { NavLink } from 'react-router';
 import { NAV_GROUP_ORDER, NAV_ITEMS, type NavItem } from '@/app/navigation';
 import { usePermissions } from '@/hooks/usePermissions';
+import { useFeatureFlags } from '@/hooks/useFeatureFlags';
 import { cn } from '@/lib/cn';
 
 /**
@@ -18,8 +19,11 @@ export function SidebarNav({
   onNavigate?: () => void;
 }) {
   const { canAny } = usePermissions();
+  const { isEnabled } = useFeatureFlags();
 
-  const visible = NAV_ITEMS.filter((item) => !item.permissions || canAny(item.permissions));
+  const visible = NAV_ITEMS.filter(
+    (item) => (!item.permissions || canAny(item.permissions)) && (!item.featureFlag || isEnabled(item.featureFlag)),
+  );
   const grouped = NAV_GROUP_ORDER.map((group) => ({
     group,
     items: visible.filter((item) => item.group === group),
