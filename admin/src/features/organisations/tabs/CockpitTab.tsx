@@ -117,7 +117,6 @@ export function CockpitTab({ companyId, onNavigateTab }: { companyId: string; on
           <CardBody className="grid grid-cols-2 gap-4">
             <Field label="Subscription">{c.billing.subscriptionStatus}</Field>
             <Field label="Plan price ID">{c.billing.planPriceId ?? '—'}</Field>
-            <Field label="Asset quantity">{c.billing.assetQuantity ?? '—'}</Field>
             <Field label="Payment failures">{c.billing.paymentFailureCount}</Field>
             <Field label="Trial ends">{fmtDate(c.billing.trialEndsAt)}</Field>
             <Field label="Grace ends">{fmtDate(c.billing.gracePeriodEndsAt)}</Field>

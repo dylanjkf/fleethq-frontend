@@ -28,7 +28,6 @@ const COCKPIT: OrgCockpit = {
     planPriceId: 'price_123',
     trialEndsAt: null,
     trialActive: false,
-    assetQuantity: 7,
     paymentFailureCount: 2,
     gracePeriodEndsAt: new Date('2030-01-01').toISOString(),
     nextPaymentAttemptAt: null,
