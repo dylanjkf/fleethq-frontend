@@ -52,7 +52,13 @@ apiClient.interceptors.response.use(
     const status = error.response?.status ?? 0;
     const body = error.response?.data?.error;
 
-    if (status === 401) {
+    // A wrong (or space-grouped) second factor at the login MFA challenge comes
+    // back as 401 MFA_CODE_INVALID. That is a retryable input error on a flow
+    // that isn't signed in yet — NOT a dead session — so it must propagate as a
+    // normal error and let the login screen show "that code is incorrect" while
+    // keeping the in-progress mfaToken. Forcing a logout here wiped that state
+    // and bounced the user all the way back to the username/password step.
+    if (status === 401 && body?.code !== 'MFA_CODE_INVALID') {
       tokenStore.clear();
       onUnauthorized?.();
     }

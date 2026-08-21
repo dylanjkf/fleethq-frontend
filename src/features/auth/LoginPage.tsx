@@ -141,7 +141,10 @@ export function LoginPage() {
     if (!mfaToken) return;
     setFormError(null);
     try {
-      await handleResult(await verifyMfa(mfaToken, values.code.trim(), rememberDevice));
+      // Strip all whitespace, not just the ends — authenticator apps show the
+      // code grouped ("123 456"). A wrong/spaced code no longer bounces the user
+      // back to the credentials step (see api/client.ts), so a plain retry works.
+      await handleResult(await verifyMfa(mfaToken, values.code.replace(/\s/g, ''), rememberDevice));
     } catch (err) {
       setFormError(errorMessage(err, 'That code is incorrect.'));
     }
