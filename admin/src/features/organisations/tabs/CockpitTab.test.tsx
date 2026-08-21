@@ -86,6 +86,28 @@ describe('CockpitTab — customer 360', () => {
     expect(screen.queryByRole('button', { name: /Impersonate a user/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Feature flags/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Billing/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Reset a user's password/ })).not.toBeInTheDocument();
+  });
+
+  it('does NOT show the password-reset action to a customer_users:view-only operator', async () => {
+    // The reset endpoint requires customer_users:manage; :view is not enough, so
+    // the button must be hidden rather than shown-and-failing on click.
+    renderTab(['organisations:view', 'customer_users:view']);
+    await screen.findByText('Past due'); // wait for load
+    expect(screen.queryByRole('button', { name: /Reset a user's password/ })).not.toBeInTheDocument();
+  });
+
+  it('shows the password-reset action to a customer_users:manage operator and hands off to the tab', async () => {
+    const user = userEvent.setup();
+    const { onNavigateTab } = renderTab(['organisations:view', 'customer_users:manage']);
+
+    const resetBtn = await screen.findByRole('button', { name: /Reset a user's password/ });
+    // Gated purely on manage — the other actions stay hidden for this operator.
+    expect(screen.queryByRole('button', { name: /Impersonate a user/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Billing/ })).not.toBeInTheDocument();
+
+    await user.click(resetBtn);
+    expect(onNavigateTab).toHaveBeenCalledWith('overview');
   });
 
   it('shows a quick action only for its permission and hands off to the existing tab', async () => {

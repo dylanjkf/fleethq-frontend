@@ -48,9 +48,15 @@ export function CockpitTab({ companyId, onNavigateTab }: { companyId: string; on
   const c: OrgCockpit = query.data;
 
   const canImpersonate = hasPermission('organisations:impersonate');
+  // The password-reset quick action triggers POST /admin/customer-users/:id/
+  // send-password-reset, which requires customer_users:manage (see
+  // admin-customer-users.controller.ts). Gate on the same permission the
+  // endpoint enforces — not customer_users:view — so a view-only operator
+  // isn't shown a button that would fail on click.
+  const canResetPassword = hasPermission('customer_users:manage');
   const canBilling = hasPermission('billing:manage');
   const canFlags = hasPermission('feature_flags:view');
-  const anyQuickAction = canImpersonate || canBilling || canFlags;
+  const anyQuickAction = canImpersonate || canResetPassword || canBilling || canFlags;
 
   return (
     <div className="space-y-4">
@@ -89,7 +95,7 @@ export function CockpitTab({ companyId, onNavigateTab }: { companyId: string; on
                 Impersonate a user
               </Button>
             )}
-            {hasPermission('customer_users:view') && (
+            {canResetPassword && (
               <Button variant="secondary" size="sm" onClick={() => onNavigateTab('overview')}>
                 Reset a user's password
               </Button>
