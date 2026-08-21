@@ -66,6 +66,7 @@ async function viewFile(id: string) {
  */
 export function CompliancePage() {
   const { can } = usePermissions();
+  const canView = can(PERMISSIONS.COMPLIANCE_VIEW);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -77,11 +78,13 @@ export function CompliancePage() {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: () => listComplianceDocuments({ pageSize: 100 }),
+    enabled: canView,
   });
 
   const atRiskQuery = useQuery({
     queryKey: ['fatigue', 'at-risk'],
     queryFn: getAtRiskOperators,
+    enabled: canView,
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: QUERY_KEY });
@@ -124,6 +127,10 @@ export function CompliancePage() {
     } else {
       await createMutation.mutateAsync(values);
     }
+  }
+
+  if (!canView) {
+    return <EmptyState icon={ShieldCheck} title="No access" description="You need the compliance:view permission to see compliance documents." />;
   }
 
   const documents = data?.items ?? [];

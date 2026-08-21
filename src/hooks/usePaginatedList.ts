@@ -10,6 +10,8 @@ interface UsePaginatedListArgs<T> {
   queryKey: readonly unknown[];
   queryFn: (params: ListParams) => Promise<Paginated<T>>;
   pageSize?: number;
+  /** Gate the fetch (e.g. skip it when the caller lacks the view permission). Defaults to true. */
+  enabled?: boolean;
 }
 
 export interface PaginatedListResult<T> {
@@ -46,7 +48,7 @@ export interface PaginatedListResult<T> {
  * first page. Debounces the search box, resets to page 1 when the term changes,
  * and keeps the previous page visible while the next loads (no flash).
  */
-export function usePaginatedList<T>({ queryKey, queryFn, pageSize = DEFAULT_PAGE_SIZE }: UsePaginatedListArgs<T>): PaginatedListResult<T> {
+export function usePaginatedList<T>({ queryKey, queryFn, pageSize = DEFAULT_PAGE_SIZE, enabled = true }: UsePaginatedListArgs<T>): PaginatedListResult<T> {
   const [page, setPage] = useState(1);
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -68,6 +70,7 @@ export function usePaginatedList<T>({ queryKey, queryFn, pageSize = DEFAULT_PAGE
     queryKey: [...queryKey, { page, pageSize, search }],
     queryFn: () => queryFn({ page, pageSize, search: search || undefined }),
     placeholderData: keepPreviousData,
+    enabled,
   });
 
   const total = query.data?.total ?? 0;

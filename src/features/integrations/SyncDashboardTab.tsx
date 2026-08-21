@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { getDashboard, listConnections, triggerSync, TARGET_ENTITY_LABELS } from '@/api/integrations';
 import { ErrorState } from '@/components/ui/error-state';
@@ -125,9 +126,17 @@ export function SyncDashboardTab({ canManage }: { canManage: boolean }) {
 function StatTile({ label, value, tone = 'neutral' }: { label: string; value: string | number; tone?: 'neutral' | 'ok' | 'warn' | 'bad' }) {
   const toneClass =
     tone === 'bad' ? 'text-danger-500' : tone === 'warn' ? 'text-warning-500' : tone === 'ok' ? 'text-success-500' : 'text-(--text-primary)';
+  // Non-colour cues so status isn't signalled by colour alone: an alert icon on
+  // the states that need attention, and an sr-only word for every non-neutral tone.
+  const toneWord = tone === 'bad' ? 'action needed' : tone === 'warn' ? 'watch' : tone === 'ok' ? 'on track' : null;
+  const showAlert = tone === 'bad' || tone === 'warn';
   return (
     <div className="min-w-[130px] flex-1 rounded-lg border border-(--border-subtle) bg-(--surface-1) px-4 py-3">
-      <div className={`text-2xl font-semibold tabular-nums ${toneClass}`}>{value}</div>
+      <div className={`flex items-center gap-1.5 text-2xl font-semibold tabular-nums ${toneClass}`}>
+        {showAlert && <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />}
+        <span>{value}</span>
+        {toneWord && <span className="sr-only">({toneWord})</span>}
+      </div>
       <div className="mt-0.5 text-xs text-(--text-tertiary)">{label}</div>
     </div>
   );

@@ -306,9 +306,9 @@ function OneOffPlanDialog({
           }}
         >
           <div className="space-y-1.5">
-            <Label>Truck</Label>
+            <Label htmlFor="one-off-truck">Truck</Label>
             <Select value={assetId} onValueChange={setAssetId}>
-              <SelectTrigger>
+              <SelectTrigger id="one-off-truck">
                 <SelectValue placeholder={assetsQuery.isLoading ? 'Loading…' : 'Choose a truck'} />
               </SelectTrigger>
               <SelectContent>

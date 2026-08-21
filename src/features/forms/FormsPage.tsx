@@ -57,6 +57,7 @@ function describeFormError(err: unknown): string {
  */
 export function FormsPage() {
   const { can } = usePermissions();
+  const canView = can(PERMISSIONS.FORMS_VIEW);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -66,8 +67,8 @@ export function FormsPage() {
   const [filling, setFilling] = useState<FormTemplate | undefined>();
   const [viewing, setViewing] = useState<FormSubmission | undefined>();
 
-  const templatesQuery = useQuery({ queryKey: TEMPLATES_KEY, queryFn: () => listFormTemplates({ pageSize: 100 }) });
-  const submissionsQuery = useQuery({ queryKey: SUBMISSIONS_KEY, queryFn: () => listFormSubmissions({ pageSize: 100 }) });
+  const templatesQuery = useQuery({ queryKey: TEMPLATES_KEY, queryFn: () => listFormTemplates({ pageSize: 100 }), enabled: canView });
+  const submissionsQuery = useQuery({ queryKey: SUBMISSIONS_KEY, queryFn: () => listFormSubmissions({ pageSize: 100 }), enabled: canView });
 
   const invalidateTemplates = () => queryClient.invalidateQueries({ queryKey: TEMPLATES_KEY });
 
@@ -105,6 +106,10 @@ export function FormsPage() {
     } else {
       await createMutation.mutateAsync(values);
     }
+  }
+
+  if (!canView) {
+    return <EmptyState icon={FileInput} title="No access" description="You need the forms:view permission to see forms." />;
   }
 
   const templates = templatesQuery.data?.items ?? [];

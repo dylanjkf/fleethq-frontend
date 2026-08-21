@@ -48,6 +48,7 @@ function fileKindLabel(contentType: string): string {
  */
 export function DocumentsPage() {
   const { can } = usePermissions();
+  const canView = can(PERMISSIONS.DOCUMENTS_VIEW);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -61,6 +62,7 @@ export function DocumentsPage() {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: [...QUERY_KEY, { category, search }],
     queryFn: () => listDocuments({ pageSize: 200, category: category ?? undefined, search: search.trim() || undefined }),
+    enabled: canView,
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: QUERY_KEY });
@@ -132,6 +134,12 @@ export function DocumentsPage() {
 
   const canCreate = can(PERMISSIONS.DOCUMENTS_CREATE);
   const canArchive = can(PERMISSIONS.DOCUMENTS_ARCHIVE);
+
+  // Early-return after all hooks (rules-of-hooks): a user without documents:view
+  // gets the same clean "No access" panel as FuelPage/AuditLogPage.
+  if (!canView) {
+    return <EmptyState icon={FileText} title="No access" description="You need the documents:view permission to see company documents." />;
+  }
 
   return (
     <Panel>

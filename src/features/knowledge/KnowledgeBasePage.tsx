@@ -44,6 +44,7 @@ function formatBytes(bytes: number): string {
  */
 export function KnowledgeBasePage() {
   const { can } = usePermissions();
+  const canView = can(PERMISSIONS.KNOWLEDGE_VIEW);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -58,6 +59,7 @@ export function KnowledgeBasePage() {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: [...QUERY_KEY, { category, search }],
     queryFn: () => listKnowledgeArticles({ pageSize: 200, category: category ?? undefined, search: search.trim() || undefined }),
+    enabled: canView,
   });
 
   const openQuery = useQuery({
@@ -128,6 +130,11 @@ export function KnowledgeBasePage() {
   const [chips, setChips] = useState<string[]>([]);
   if (data?.categories && data.categories.join('|') !== chips.join('|')) {
     setChips(data.categories);
+  }
+
+  // Early-return after all hooks (rules-of-hooks).
+  if (!canView) {
+    return <EmptyState icon={BookOpen} title="No access" description="You need the knowledge:view permission to see the knowledge base." />;
   }
 
   return (

@@ -140,15 +140,23 @@ export function ImpactPage() {
 
 // ---- headline cards ---------------------------------------------------------
 
+// A short word for each tone so status is never signalled by colour alone —
+// colour-blind users and screen readers get the meaning too.
+const TONE_LABEL: Record<'accent' | 'ok' | 'warn' | 'bad', string | null> = { accent: null, ok: 'On track', warn: 'Watch', bad: 'Action needed' };
+
 function Headline({ icon: Icon, label, value, sub, tone }: { icon: typeof PackageCheck; label: string; value: string; sub: string; tone: 'accent' | 'ok' | 'warn' | 'bad' }) {
   const valueClass = tone === 'bad' ? 'text-danger-500' : tone === 'warn' ? 'text-warning-500' : tone === 'ok' ? 'text-success-500' : 'text-(--text-primary)';
+  const toneLabel = TONE_LABEL[tone];
   return (
     <div className="rounded-(--radius-panel) border border-(--border-subtle) bg-(--surface-1) p-4">
       <div className="flex items-center gap-2 text-(--text-tertiary)">
         <Icon className="h-4 w-4" />
         <span className="text-xs font-medium">{label}</span>
       </div>
-      <div className={`mt-2 text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</div>
+      <div className="mt-2 flex items-baseline gap-2">
+        <span className={`text-2xl font-semibold tabular-nums ${valueClass}`}>{value}</span>
+        {toneLabel && <span className={`text-[0.6875rem] font-semibold uppercase tracking-wide ${valueClass}`}>{toneLabel}</span>}
+      </div>
       <div className="mt-0.5 text-xs text-(--text-tertiary)">{sub}</div>
     </div>
   );
