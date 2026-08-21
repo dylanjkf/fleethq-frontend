@@ -76,10 +76,22 @@ export function TermsPage() {
       </Section>
       <Section heading="4. Fees and billing">
         <p>
-          Subscription fees are charged in advance for the plan and asset quantity you select, via our
-          payment processor. Fees are exclusive of GST unless stated. Unless required by law, fees are
-          non-refundable for partial periods. You can cancel at any time; access continues until the end
-          of the paid period.
+          FleetHQ is a single flat subscription of A$29 per month for your whole account, charged in
+          advance via our payment processor. The price is the same regardless of how many assets,
+          operators or users you add — it does not scale with the size of your fleet. Fees are
+          exclusive of GST unless stated, and a GST tax invoice is issued for each payment. Unless
+          required by law, fees are non-refundable for partial periods.
+        </p>
+        <p>
+          Your subscription has a 12-month minimum term, starting when your subscription begins (your
+          free trial counts toward the term). During the minimum term the subscription cannot be
+          cancelled online; after the minimum term it continues until the end of the current paid
+          period once you cancel. If you are experiencing genuine hardship — for example your
+          business is closing — you can ask us to release you from the minimum term early by
+          contacting our support team via our{' '}
+          <Link to="/contact" className="text-accent-600 hover:underline">Contact page</Link>; we
+          assess these requests case by case. Nothing in this clause limits any rights you have under
+          the Australian Consumer Law that cannot be excluded.
         </p>
       </Section>
       <Section heading="5. Your data and intellectual property">
@@ -108,9 +120,10 @@ export function TermsPage() {
       </Section>
       <Section heading="8. Term and termination">
         <p>
-          Either party may end the subscription in line with the plan. We may suspend or terminate access
-          for a material breach of these terms. On termination you may export your data for a reasonable
-          period, after which we may delete it in line with our retention practices.
+          Subscriptions run for the 12-month minimum term described in clause 4 and then continue
+          until cancelled at the end of the current paid period. We may suspend or terminate access
+          for a material breach of these terms. On termination you may export your data for a
+          reasonable period, after which we may delete it in line with our retention practices.
         </p>
       </Section>
       <Section heading="9. Governing law">
