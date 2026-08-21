@@ -208,7 +208,7 @@ export function SignupPage() {
                           <span>
                             I agree to the{' '}
                             <Link to="/terms" className="text-accent-600 hover:underline">Terms of Service</Link>{' '}and{' '}
-                            <Link to="/privacy" className="text-accent-600 hover:underline">Privacy Policy</Link>. Billed monthly, cancel anytime.
+                            <Link to="/privacy" className="text-accent-600 hover:underline">Privacy Policy</Link>. Billed monthly, with a 12-month minimum term (see the Terms).
                           </span>
                         </label>
                         <FormMessage />
