@@ -118,6 +118,8 @@ export interface OrgCockpit {
     gracePeriodEndsAt: string | null;
     nextPaymentAttemptAt: string | null;
     contractEndsAt: string | null;
+    contractReleasedAt: string | null;
+    contractReleaseReason: string | null;
   };
   usage: {
     assets: number;
@@ -131,6 +133,8 @@ export interface OrgCockpit {
     inGrace: boolean;
     graceElapsed: boolean;
     trialExpiringSoon: boolean;
+    /** Still inside the 12-month minimum term and not released for cause — a "cancel for me" request must be declined. */
+    lockedIn: boolean;
     featureFlagOverrides: { key: string; name: string; enabled: boolean }[];
   };
   recentActivity: {
