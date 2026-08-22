@@ -12,6 +12,10 @@ export function FeatureFlagsTab({ companyId }: { companyId: string }) {
 
   function invalidate() {
     void queryClient.invalidateQueries({ queryKey: ['organisation-feature-flags', companyId] });
+    // The cockpit's "Feature-flag overrides" card reads the same overrides, so a
+    // toggle here must refresh it too — otherwise switching to the Cockpit tab
+    // shows a stale override list until a manual reload.
+    void queryClient.invalidateQueries({ queryKey: ['organisation-cockpit', companyId] });
   }
 
   const setMutation = useMutation({

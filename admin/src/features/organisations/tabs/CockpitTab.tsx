@@ -74,6 +74,10 @@ export function CockpitTab({ companyId, onNavigateTab }: { companyId: string; on
           {c.flags.graceElapsed && <Badge tone="danger">Grace elapsed</Badge>}
           {c.flags.trialExpiringSoon && <Badge tone="warning">Trial expiring soon</Badge>}
           {c.billing.trialActive && !c.flags.trialExpiringSoon && <Badge tone="accent">Trialing</Badge>}
+          {/* Within the 12-month minimum term — a "cancel for me" request must be
+              declined or escalated to a release, not actioned. */}
+          {c.flags.lockedIn && <Badge tone="accent">Locked in (min term)</Badge>}
+          {c.billing.contractReleasedAt && <Badge tone="neutral">Contract released</Badge>}
           {!c.suspendedAt &&
             !c.archivedAt &&
             !c.flags.pastDue &&
@@ -128,6 +132,9 @@ export function CockpitTab({ companyId, onNavigateTab }: { companyId: string; on
             <Field label="Grace ends">{fmtDate(c.billing.gracePeriodEndsAt)}</Field>
             <Field label="Next payment attempt">{fmtDate(c.billing.nextPaymentAttemptAt)}</Field>
             <Field label="Contract ends">{fmtDate(c.billing.contractEndsAt)}</Field>
+            <Field label="Locked in">{c.flags.lockedIn ? 'Yes — within minimum term' : 'No'}</Field>
+            <Field label="Contract released">{fmtDateTime(c.billing.contractReleasedAt)}</Field>
+            {c.billing.contractReleaseReason && <Field label="Release reason">{c.billing.contractReleaseReason}</Field>}
           </CardBody>
         </Card>
 

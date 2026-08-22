@@ -32,6 +32,8 @@ const COCKPIT: OrgCockpit = {
     gracePeriodEndsAt: new Date('2030-01-01').toISOString(),
     nextPaymentAttemptAt: null,
     contractEndsAt: null,
+    contractReleasedAt: null,
+    contractReleaseReason: null,
   },
   usage: { assets: 7, operators: 3, users: 4, recentJobs30d: 12, lastActiveAt: new Date('2026-08-01').toISOString() },
   flags: {
@@ -39,6 +41,7 @@ const COCKPIT: OrgCockpit = {
     inGrace: true,
     graceElapsed: false,
     trialExpiringSoon: false,
+    lockedIn: false,
     featureFlagOverrides: [{ key: 'beta_x', name: 'Beta X', enabled: true }],
   },
   recentActivity: [
@@ -78,6 +81,29 @@ describe('CockpitTab — customer 360', () => {
     expect(screen.getByText('Beta X')).toBeInTheDocument();
     // Recent admin activity.
     expect(screen.getByText('organisations.suspended')).toBeInTheDocument();
+  });
+
+  it('surfaces the 12-month lock-in so support can see a cancel request must be declined', async () => {
+    vi.mocked(orgApi.getOrganisationCockpit).mockResolvedValue({
+      ...COCKPIT,
+      billing: { ...COCKPIT.billing, contractEndsAt: new Date('2030-01-01').toISOString() },
+      flags: { ...COCKPIT.flags, lockedIn: true },
+    });
+    renderTab(['organisations:view']);
+    expect(await screen.findByText('Locked in (min term)')).toBeInTheDocument();
+  });
+
+  it('shows the contract release, with reason, once a company has been released for cause', async () => {
+    vi.mocked(orgApi.getOrganisationCockpit).mockResolvedValue({
+      ...COCKPIT,
+      billing: { ...COCKPIT.billing, contractReleasedAt: new Date('2026-08-15').toISOString(), contractReleaseReason: 'Persistent outage' },
+      flags: { ...COCKPIT.flags, lockedIn: false },
+    });
+    renderTab(['organisations:view']);
+    // "Contract released" appears as both the Status badge and the Billing field label.
+    expect((await screen.findAllByText('Contract released')).length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText('Persistent outage')).toBeInTheDocument();
+    expect(screen.queryByText('Locked in (min term)')).not.toBeInTheDocument();
   });
 
   it('hides all quick actions from an operator with only organisations:view', async () => {
