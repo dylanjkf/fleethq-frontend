@@ -52,6 +52,7 @@ const NON_TERMINAL_STATUSES = ['OPEN', 'IN_PROGRESS', 'PARTS_PENDING'] as const;
  */
 export function MaintenancePage() {
   const { can } = usePermissions();
+  const canView = can(PERMISSIONS.MAINTENANCE_VIEW);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -62,6 +63,7 @@ export function MaintenancePage() {
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: QUERY_KEY,
     queryFn: () => listMaintenanceJobs({ pageSize: 100 }),
+    enabled: canView,
   });
 
   const partsQuery = useQuery({
@@ -164,6 +166,12 @@ export function MaintenancePage() {
     return 0;
   });
   const isTerminal = (job: MaintenanceJob) => job.status === 'COMPLETE';
+
+  // A user who reaches this URL without maintenance:view gets the same clean
+  // "No access" panel as FuelPage/AuditLogPage — not a raw 403 error state.
+  if (!canView) {
+    return <EmptyState icon={Wrench} title="No access" description="You need the maintenance:view permission to see the workshop." />;
+  }
 
   return (
     <Panel>

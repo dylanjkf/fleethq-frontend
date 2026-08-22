@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from '@/components/ui/drawer';
 import { EmptyState } from '@/components/ui/empty-state';
+import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SyncStatusBadge } from '@/features/integrations/SyncStatusBadge';
@@ -119,6 +120,10 @@ export function ConnectionDetailDrawer({ connectionId, canManage, onOpenChange }
 
         {connectionQuery.isLoading ? (
           <Skeleton className="h-40 w-full" />
+        ) : connectionQuery.isError ? (
+          // A failed load previously fell through to `null` — a silently blank
+          // drawer. Show the error with a retry instead.
+          <ErrorState message={describeApiError(connectionQuery.error)} onRetry={() => void connectionQuery.refetch()} />
         ) : connection ? (
           <div className="space-y-6">
             <div className="flex flex-wrap items-center gap-2 text-sm">

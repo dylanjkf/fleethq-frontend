@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ClipboardCheck, Plus } from 'lucide-react';
+import { AlertTriangle, ClipboardCheck, Plus } from 'lucide-react';
 import {
   archiveChecklistTemplate,
   createChecklistTemplate,
@@ -50,6 +50,7 @@ function toInput(values: ChecklistTemplateFormValues) {
  */
 export function ChecklistsPage() {
   const { can } = usePermissions();
+  const canView = can(PERMISSIONS.CHECKLISTS_VIEW);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -61,14 +62,17 @@ export function ChecklistsPage() {
   const templatesQuery = useQuery({
     queryKey: TEMPLATES_KEY,
     queryFn: () => listChecklistTemplates({ pageSize: 100 }),
+    enabled: canView,
   });
   const submissionsQuery = useQuery({
     queryKey: SUBMISSIONS_KEY,
     queryFn: () => listChecklistSubmissions({ pageSize: 100 }),
+    enabled: canView,
   });
   const statusQuery = useQuery({
     queryKey: ['checklist-status', 'today'],
     queryFn: getChecklistStatusToday,
+    enabled: canView,
   });
 
   const invalidateTemplates = () => queryClient.invalidateQueries({ queryKey: TEMPLATES_KEY });
@@ -108,6 +112,10 @@ export function ChecklistsPage() {
     } else {
       await createMutation.mutateAsync(values);
     }
+  }
+
+  if (!canView) {
+    return <EmptyState icon={ClipboardCheck} title="No access" description="You need the checklists:view permission to see checklists." />;
   }
 
   const templates = templatesQuery.data?.items ?? [];
@@ -352,9 +360,17 @@ function StatTile({ label, value, tone = 'neutral' }: { label: string; value: st
         : tone === 'ok'
           ? 'text-success-500'
           : 'text-(--text-primary)';
+  // Non-colour cues so status isn't signalled by colour alone: an alert icon on
+  // the states that need attention, and an sr-only word for every non-neutral tone.
+  const toneWord = tone === 'bad' ? 'action needed' : tone === 'warn' ? 'watch' : tone === 'ok' ? 'on track' : null;
+  const showAlert = tone === 'bad' || tone === 'warn';
   return (
     <div className="min-w-[130px] flex-1 rounded-lg border border-(--border-subtle) bg-(--surface-1) px-4 py-3">
-      <div className={`text-2xl font-semibold tabular-nums ${toneClass}`}>{value}</div>
+      <div className={`flex items-center gap-1.5 text-2xl font-semibold tabular-nums ${toneClass}`}>
+        {showAlert && <AlertTriangle className="h-4 w-4 shrink-0" aria-hidden="true" />}
+        <span>{value}</span>
+        {toneWord && <span className="sr-only">({toneWord})</span>}
+      </div>
       <div className="mt-0.5 text-xs text-(--text-tertiary)">{label}</div>
     </div>
   );

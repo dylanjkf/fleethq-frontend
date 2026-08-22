@@ -142,9 +142,9 @@ export function ComplianceDocumentFormDialog({ open, onOpenChange, document, onS
 
             {targetType === 'asset' ? (
               <div className="space-y-1.5">
-                <Label>Asset</Label>
+                <Label htmlFor="compliance-asset">Asset</Label>
                 <Select value={assetId} onValueChange={setAssetId} disabled={!!document}>
-                  <SelectTrigger>
+                  <SelectTrigger id="compliance-asset">
                     <SelectValue placeholder="Select an asset" />
                   </SelectTrigger>
                   <SelectContent>
@@ -159,9 +159,9 @@ export function ComplianceDocumentFormDialog({ open, onOpenChange, document, onS
               </div>
             ) : (
               <div className="space-y-1.5">
-                <Label>Operator</Label>
+                <Label htmlFor="compliance-operator">Operator</Label>
                 <Select value={operatorId} onValueChange={setOperatorId} disabled={!!document}>
-                  <SelectTrigger>
+                  <SelectTrigger id="compliance-operator">
                     <SelectValue placeholder="Select an operator" />
                   </SelectTrigger>
                   <SelectContent>
@@ -262,7 +262,7 @@ export function ComplianceDocumentFormDialog({ open, onOpenChange, document, onS
               )}
             />
             <div className="space-y-1.5">
-              <Label>Scan/photo of the document (optional)</Label>
+              <Label htmlFor="compliance-file">Scan/photo of the document (optional)</Label>
               {filePhoto ? (
                 <div className="flex items-center justify-between rounded-md border border-(--border-subtle) px-3 py-2 text-sm">
                   <span>{filePhoto.filename}</span>
@@ -271,7 +271,7 @@ export function ComplianceDocumentFormDialog({ open, onOpenChange, document, onS
                   </button>
                 </div>
               ) : (
-                <Input type="file" accept="image/*,application/pdf" onChange={onPickFile} />
+                <Input id="compliance-file" type="file" accept="image/*,application/pdf" onChange={onPickFile} />
               )}
               {document?.fileAttachment && !filePhoto && (
                 <p className="text-xs text-(--text-tertiary)">Currently attached: {document.fileAttachment.filename}</p>

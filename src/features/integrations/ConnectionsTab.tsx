@@ -110,7 +110,22 @@ export function ConnectionsTab({ canManage }: { canManage: boolean }) {
           </TableHeader>
           <TableBody>
             {items.map((c) => (
-              <TableRow key={c.id} className="cursor-pointer" onClick={() => setDetailId(c.id)}>
+              <TableRow
+                key={c.id}
+                className="cursor-pointer"
+                onClick={() => setDetailId(c.id)}
+                // The whole row opens the detail drawer, so it must be reachable
+                // and activatable by keyboard, not mouse only.
+                role="button"
+                tabIndex={0}
+                aria-label={`View ${c.name} connection details`}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    setDetailId(c.id);
+                  }
+                }}
+              >
                 <TableCell className="font-medium text-(--text-primary)">
                   {c.name}
                   {!c.isEnabled && (

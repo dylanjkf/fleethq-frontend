@@ -121,9 +121,14 @@ export function CredentialsTab({ canManage }: { canManage: boolean }) {
                 <TableCell>{c.archivedAt ? <Badge variant="neutral">Archived</Badge> : <Badge variant="success">Configured</Badge>}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">
-                    <Button variant="ghost" size="sm" disabled={testM.isPending} onClick={() => testM.mutate(c.id)}>
-                      Test
-                    </Button>
+                    {/* "Test" makes a live authenticated call with the stored
+                        secret — a manage action, gated like Edit/Archive so a
+                        view-only user can't exercise the credential. */}
+                    {canManage && (
+                      <Button variant="ghost" size="sm" disabled={testM.isPending} onClick={() => testM.mutate(c.id)}>
+                        Test
+                      </Button>
+                    )}
                     {canManage && !c.archivedAt && (
                       <>
                         <Button

@@ -141,15 +141,21 @@ export function FormRunnerDialog({ template, onOpenChange }: FormRunnerDialogPro
         )}
 
         <div className="space-y-4">
-          {visibleFields.map((field) => (
+          {visibleFields.map((field) => {
+            // Associate the visible label with the field's control. multi_select
+            // renders its own per-option <label>s (each checkbox is self-labelled),
+            // so the group heading takes no htmlFor.
+            const controlId = field.type === 'multi_select' ? undefined : `form-field-${field.id}`;
+            return (
             <div key={field.id} className="space-y-1.5">
-              <Label>
+              <Label htmlFor={controlId}>
                 {field.label}
                 {field.required && <span className="text-danger-500"> *</span>}
               </Label>
 
               {field.type === 'text' && (
                 <Textarea
+                  id={controlId}
                   rows={2}
                   value={(answers[field.id] as string) ?? ''}
                   onChange={(e) => setValue(field.id, e.target.value)}
@@ -158,6 +164,7 @@ export function FormRunnerDialog({ template, onOpenChange }: FormRunnerDialogPro
 
               {field.type === 'number' && (
                 <Input
+                  id={controlId}
                   type="number"
                   value={(answers[field.id] as number | undefined) ?? ''}
                   onChange={(e) => setValue(field.id, e.target.value === '' ? undefined : Number(e.target.value))}
@@ -165,12 +172,12 @@ export function FormRunnerDialog({ template, onOpenChange }: FormRunnerDialogPro
               )}
 
               {field.type === 'date' && (
-                <Input type="date" value={(answers[field.id] as string) ?? ''} onChange={(e) => setValue(field.id, e.target.value)} />
+                <Input id={controlId} type="date" value={(answers[field.id] as string) ?? ''} onChange={(e) => setValue(field.id, e.target.value)} />
               )}
 
               {field.type === 'single_select' && (
                 <Select value={(answers[field.id] as string) ?? ''} onValueChange={(v) => setValue(field.id, v)}>
-                  <SelectTrigger>
+                  <SelectTrigger id={controlId}>
                     <SelectValue placeholder="Select…" />
                   </SelectTrigger>
                   <SelectContent>
@@ -199,7 +206,7 @@ export function FormRunnerDialog({ template, onOpenChange }: FormRunnerDialogPro
 
               {field.type === 'asset_ref' && (
                 <Select value={(answers[field.id] as string) ?? ''} onValueChange={(v) => setValue(field.id, v)} disabled={assetsQuery.isLoading}>
-                  <SelectTrigger>
+                  <SelectTrigger id={controlId}>
                     <SelectValue placeholder={assetsQuery.isLoading ? 'Loading assets…' : 'Select an asset…'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -215,7 +222,7 @@ export function FormRunnerDialog({ template, onOpenChange }: FormRunnerDialogPro
 
               {field.type === 'operator_ref' && (
                 <Select value={(answers[field.id] as string) ?? ''} onValueChange={(v) => setValue(field.id, v)} disabled={operatorsQuery.isLoading}>
-                  <SelectTrigger>
+                  <SelectTrigger id={controlId}>
                     <SelectValue placeholder={operatorsQuery.isLoading ? 'Loading operators…' : 'Select an operator…'} />
                   </SelectTrigger>
                   <SelectContent>
@@ -229,7 +236,8 @@ export function FormRunnerDialog({ template, onOpenChange }: FormRunnerDialogPro
               )}
               {field.type === 'operator_ref' && <PickerError query={operatorsQuery} noun="operators" />}
             </div>
-          ))}
+            );
+          })}
         </div>
 
         {error && <p className="text-sm text-danger-500">{error}</p>}

@@ -41,6 +41,7 @@ const IMPORT_FIELDS = [
  */
 export function CustomersPage() {
   const { can } = usePermissions();
+  const canView = can(PERMISSIONS.CUSTOMERS_VIEW);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -51,7 +52,7 @@ export function CustomersPage() {
   const [viewingHistory, setViewingHistory] = useState<Customer | undefined>();
   const [viewingDeliveries, setViewingDeliveries] = useState<Customer | undefined>();
 
-  const list = usePaginatedList<Customer>({ queryKey: QUERY_KEY, queryFn: listCustomers });
+  const list = usePaginatedList<Customer>({ queryKey: QUERY_KEY, queryFn: listCustomers, enabled: canView });
 
   const createMutation = useMutation({
     mutationFn: createCustomer,
@@ -87,6 +88,10 @@ export function CustomersPage() {
     } else {
       await createMutation.mutateAsync(values);
     }
+  }
+
+  if (!canView) {
+    return <EmptyState icon={BookUser} title="No access" description="You need the customers:view permission to see the customer directory." />;
   }
 
   return (

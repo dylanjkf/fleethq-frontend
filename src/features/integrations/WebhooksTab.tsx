@@ -146,9 +146,14 @@ export function WebhooksTab({ canManage }: { canManage: boolean }) {
                     <Button variant="ghost" size="sm" onClick={() => setDeliveriesFor(w)}>
                       Deliveries
                     </Button>
-                    <Button variant="ghost" size="sm" disabled={testM.isPending} onClick={() => testM.mutate(w.id)}>
-                      Test
-                    </Button>
+                    {/* "Test" fires a real webhook delivery (a mutating side effect),
+                        so it belongs behind canManage like Edit/Archive — a
+                        view-only user could otherwise trigger outbound calls. */}
+                    {canManage && (
+                      <Button variant="ghost" size="sm" disabled={testM.isPending} onClick={() => testM.mutate(w.id)}>
+                        Test
+                      </Button>
+                    )}
                     {canManage && !w.archivedAt && (
                       <>
                         <Button
